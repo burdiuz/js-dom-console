@@ -1,6 +1,10 @@
 
 # DOMConsole
 
+###TODOs
+1. Add custom type handlers to be able to add more customly displayed types, like the ones that hide information behind getters.
+2. Add display for HTML nodes/elements(via outerHTML).
+
 Small UI helper to display console output on the page.
 I've made it just to [make nice demos](https://jsfiddle.net/actualwave/wa45vyz8/).
 ```javascript
