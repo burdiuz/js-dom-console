@@ -1,7 +1,7 @@
 
 # DOMConsole
 
-###TODOs
+### TODOs
 1. Add custom type handlers to be able to add more customly displayed types, like the ones that hide information behind getters.
 2. Add display for HTML nodes/elements(via outerHTML).
 
