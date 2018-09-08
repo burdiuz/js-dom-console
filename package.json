@@ -1,0 +1,108 @@
+{
+  "name": "@actualwave/tree-walker",
+  "description": "Wireframe based on ES6 Proxies for making tree traversing APIs.",
+  "version": "1.0.6",
+  "main": "dist/tree-walker.js",
+  "keywords": [
+    "js",
+    "javascript",
+    "proxy",
+    "tree",
+    "E4X"
+  ],
+  "homepage": "https://github.com/burdiuz/js-tree-walker",
+  "bugs": {
+    "url": "https://github.com/burdiuz/js-tree-walker/issues",
+    "email": "burdiuz@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Oleg Galaburda <burdiuz@gmail.com> (http://actualwave.com/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/burdiuz/js-tree-walker.git"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.6",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-istanbul": "^4.1.6",
+    "babel-plugin-syntax-trailing-function-commas": "^6.22.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-jest": "^23.2.0",
+    "dotenv": "^6.0.0",
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.1",
+    "flow-bin": "^0.79.1",
+    "husky": "^0.14.3",
+    "jest": "^23.5.0",
+    "lint-staged": "^7.2.2",
+    "prettier": "^1.14.2",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-commonjs": "^9.1.5",
+    "rollup-plugin-json": "^3.0.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-serve": "^0.4.2",
+    "rollup-plugin-uglify": "^4.0.0",
+    "uglify-es": "^3.3.9"
+  },
+  "lint-staged": {
+    "source/**/*.js": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "babel": {
+    "env": {
+      "test": {
+        "plugins": [
+          "babel-plugin-transform-es2015-modules-commonjs",
+          "babel-plugin-transform-flow-strip-types",
+          "babel-plugin-transform-class-properties",
+          [
+            "babel-plugin-transform-object-rest-spread",
+            {
+              "useBuiltIns": true
+            }
+          ]
+        ],
+        "presets": [
+          "jest"
+        ]
+      }
+    }
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageReporters": [
+      "json",
+      "lcov"
+    ],
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "source/**/*.js",
+      "!**/node_modules/**",
+      "!**/vendor/**"
+    ],
+    "modulePathIgnorePatterns": [
+      "\\/\\."
+    ]
+  },
+  "scripts": {
+    "start": "build",
+    "build": "rollup --config",
+    "build:watch": "rollup --config --watch \"./source\"",
+    "lint": "./node_modules/.bin/eslint \"source/**/*.js\"",
+    "flow": "./node_modules/.bin/flow",
+    "test": "jest --colors",
+    "test:watch": "jest --colors --watch",
+    "lint-staged": "lint-staged",
+    "precommit": "npm run lint-staged && npm run build && npm run test"
+  }
+}
