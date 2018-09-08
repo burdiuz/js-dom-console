@@ -1,25 +1,25 @@
 {
-  "name": "@actualwave/tree-walker",
-  "description": "Wireframe based on ES6 Proxies for making tree traversing APIs.",
-  "version": "1.0.6",
-  "main": "dist/tree-walker.js",
+  "name": "@actualwave/dom-console",
+  "description": "Small UI helper to display console output on the page.",
+  "version": "0.0.1",
+  "main": "console.js",
   "keywords": [
     "js",
     "javascript",
-    "proxy",
-    "tree",
-    "E4X"
+    "console",
+    "log",
+    "logs"
   ],
-  "homepage": "https://github.com/burdiuz/js-tree-walker",
+  "homepage": "https://github.com/burdiuz/js-dom-console",
   "bugs": {
-    "url": "https://github.com/burdiuz/js-tree-walker/issues",
+    "url": "https://github.com/burdiuz/js-dom-console/issues",
     "email": "burdiuz@gmail.com"
   },
   "license": "MIT",
   "author": "Oleg Galaburda <burdiuz@gmail.com> (http://actualwave.com/)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/burdiuz/js-tree-walker.git"
+    "url": "https://github.com/burdiuz/js-dom-console.git"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
