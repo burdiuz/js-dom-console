@@ -128,10 +128,8 @@
     let result;
 
     if (value instanceof Array) {
-      return value.map(stringifyValue);
-    }
-
-    if (value instanceof Map) {
+      result = value.map(stringifyValue);
+    } else if (value instanceof Map) {
       result = {};
       value.forEach((val, key) => {
         result[key] = stringifyValue(val);
@@ -263,7 +261,7 @@
 
       content.forEach(node => wrapper.appendChild(node));
 
-      wrapper.appendChild(document.createTextNode(post));
+      wrapper.appendChild(document.createTextNode(`${space}${post}`));
     };
 
     wrapper.addEventListener('click', event => {

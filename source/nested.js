@@ -108,7 +108,7 @@ export function createUINested(value, space = '', initExpanded = false) {
 
     content.forEach((node) => wrapper.appendChild(node));
 
-    wrapper.appendChild(document.createTextNode(post));
+    wrapper.appendChild(document.createTextNode(`${space}${post}`));
   };
 
   wrapper.addEventListener('click', (event) => {
