@@ -1,7 +1,7 @@
 
 # DOMConsole
 
-###TODOs
+### TODOs
 1. Add display for HTML nodes/elements(via outerHTML).
 2. Add proper display for Map keys
 
