@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { SPACE_LEVEL, getStringWrap, removeAllChildren } from './utils';
-import { stringifyValue } from './data';
+import { convert } from './data';
 
 const setExpandIconSymbol = (icon, expanded) => {
   icon.innerHTML = expanded ? '-' : '+';
@@ -47,7 +47,7 @@ const createUINestedObjectContent = (object, space) => {
 
   Object.keys(object).forEach((key) => {
     const value = object[key];
-    text += `${space}${stringifyValue(key)}: `;
+    text += `${space}${convert(key)}: `;
 
     if (typeof value === 'object') {
       result.push(document.createTextNode(text));
@@ -108,7 +108,9 @@ export function createUINested(value, space = '', initExpanded = false) {
 
     content.forEach((node) => wrapper.appendChild(node));
 
-    wrapper.appendChild(document.createTextNode(`${space}${post}`));
+    wrapper.appendChild(
+      document.createTextNode(expanded ? `${space}${post}` : post),
+    );
   };
 
   wrapper.addEventListener('click', (event) => {

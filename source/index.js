@@ -5,6 +5,13 @@ import {
   ERROR_TYPE,
   SUCCESS_TYPE,
 } from './utils';
+import {
+  addTypeHandler,
+  getTypeHandler,
+  hasTypeHandler,
+  removeTypeHandler,
+  setTypeHandlerSelector,
+} from './types';
 import { buildContent } from './dom';
 
 export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
@@ -44,4 +51,15 @@ export const create = (wrapper, maxItems = Number.MAX_SAFE_INTEGER) => {
   wrapper.appendChild(container);
 
   return init(container, maxItems);
+};
+
+/*
+Customizable type representation
+ */
+export {
+  addTypeHandler,
+  getTypeHandler,
+  hasTypeHandler,
+  removeTypeHandler,
+  setTypeHandlerSelector,
 };

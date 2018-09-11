@@ -1,5 +1,16 @@
-/* eslint-disable no-use-before-define */
-import { CLASS_NAME_KEY, MAX_FUNC_STR_LEN, getClassName } from './utils';
+import convertArray from './types/Array';
+import convertBoolean from './types/Boolean';
+import convertDate from './types/Date';
+import convertError from './types/Error';
+import convertFunction from './types/Function';
+import convertMap from './types/Map';
+import convertNumber from './types/Number';
+import convertObject from './types/Object';
+import convertSet from './types/Set';
+import convertString from './types/String';
+import convertSymbol from './types/Symbol';
+
+import { selectTypeHandler } from './types';
 
 export const isString = (value) => {
   switch (typeof value) {
@@ -7,97 +18,70 @@ export const isString = (value) => {
     case 'string':
     case 'boolean':
     case 'number':
+    case 'undefined':
       return true;
     default:
-      return !value || value instanceof Date;
+      return value === null || value instanceof Date;
   }
 };
 
 export const toString = (value) => {
   switch (typeof value) {
     case 'symbol':
-      return String(value);
+      return convertSymbol(value);
     case 'string':
-      return value;
+      return convertString(value);
     case 'boolean':
+      return convertBoolean(value);
     case 'number':
+      return convertNumber(value);
     default:
       if (value instanceof Date) {
-        return `Date(${value})`;
+        return convertDate(value);
       }
 
       return `${value}`;
   }
 };
 
-const stringifyFunction = (value) => {
-  const content = String(value);
-
-  if (content.length <= MAX_FUNC_STR_LEN) {
-    return content;
-  }
-
-  const name = getClassName(value) || 'Function';
-
-  return {
-    content,
-    [CLASS_NAME_KEY]: `${name}(${content.substr(0, MAX_FUNC_STR_LEN)})`,
-  };
-};
-
-const stringifyError = (value) => {
-  const { name, message, columnNumber, fileName, lineNumber } = value;
-  return {
-    [CLASS_NAME_KEY]: name || 'Error',
-    name: stringifyValue(name),
-    message: stringifyValue(message),
-    columnNumber: stringifyValue(columnNumber),
-    fileName: stringifyValue(fileName),
-    lineNumber: stringifyValue(lineNumber),
-  };
-};
-
-export function stringifyValue(value) {
-  if (typeof value === 'string') {
-    return JSON.stringify(value);
-  }
-
+const fallbackConversion = (value, convertValue) => {
   if (isString(value)) {
     return toString(value);
   }
 
   if (value instanceof Function) {
-    return stringifyFunction(value);
+    return convertFunction(value, convertValue);
   }
 
   if (value instanceof Error) {
-    return stringifyError(value);
+    return convertError(value, convertValue);
   }
 
-  let result;
+  if (value instanceof Map) {
+    return convertMap(value, convertValue);
+  }
+
+  if (value instanceof Set) {
+    return convertSet(value, convertValue);
+  }
 
   if (value instanceof Array) {
-    result = value.map(stringifyValue);
-  } else if (value instanceof Map) {
-    result = {};
-    value.forEach((val, key) => {
-      result[key] = stringifyValue(val);
-    });
-  } else if (value instanceof Set) {
-    result = [];
-    value.forEach((val) => result.push(stringifyValue(val)));
-  } else {
-    result = {};
-    Object.keys(value).forEach((key) => {
-      result[key] = stringifyValue(value[key]);
-    });
+    return convertArray(value, convertValue);
   }
 
-  if (result) {
-    result[CLASS_NAME_KEY] = getClassName(value) || 'Object';
-  } else {
-    result = `${getClassName(value)}()`;
+  return convertObject(value, convertValue);
+};
+
+export const convert = (value) => {
+  if (value === null || value === undefined) {
+    return `${value}`;
   }
 
-  return result;
-}
+  const handler = selectTypeHandler(value);
+
+  if (handler) {
+    return handler(value, convert);
+  }
+
+  return fallbackConversion(value, convert);
+};

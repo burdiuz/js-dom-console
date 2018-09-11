@@ -26,10 +26,14 @@
     return match ? match[1] : '';
   };
 
+  const setCustomClassNameTo = (data, className) => data[CLASS_NAME_KEY] = className;
+
+  const getCustomClassNameFrom = data => data[CLASS_NAME_KEY] || '';
+
   const getStringWrap = value => {
     let pre;
     let post;
-    const name = value[CLASS_NAME_KEY] || '';
+    const name = getCustomClassNameFrom(value);
 
     if (value instanceof Array) {
       pre = '[';
@@ -50,38 +54,42 @@
     }
   };
 
-  /* eslint-disable no-use-before-define */
-
-  const isString = value => {
-    switch (typeof value) {
-      case 'symbol':
-      case 'string':
-      case 'boolean':
-      case 'number':
-        return true;
-      default:
-        return !value || value instanceof Date;
+  const getValueType = value => {
+    if (value === null || value === undefined) {
+      return undefined;
     }
+
+    return value.constructor;
   };
 
-  const toString = value => {
-    switch (typeof value) {
-      case 'symbol':
-        return String(value);
-      case 'string':
-        return value;
-      case 'boolean':
-      case 'number':
-      default:
-        if (value instanceof Date) {
-          return `Date(${value})`;
-        }
+  var convertArray = ((value, convertValue) => {
+    const result = value.map(convertValue);
 
-        return `${value}`;
-    }
-  };
+    setCustomClassNameTo(result, getClassName(value));
 
-  const stringifyFunction = value => {
+    return result;
+  });
+
+  var convertBoolean = (value => `${value}`);
+
+  var convertDate = (value => `Date(${value})`);
+
+  var convertError = ((value, convertValue) => {
+    const { name, message, columnNumber, fileName, lineNumber } = value;
+    const result = {
+      name: convertValue(name),
+      message: convertValue(message),
+      columnNumber: convertValue(columnNumber),
+      fileName: convertValue(fileName),
+      lineNumber: convertValue(lineNumber)
+    };
+
+    setCustomClassNameTo(result, name || 'Error');
+
+    return result;
+  });
+
+  var convertFunction = (value => {
     const content = String(value);
 
     if (content.length <= MAX_FUNC_STR_LEN) {
@@ -89,69 +97,192 @@
     }
 
     const name = getClassName(value) || 'Function';
+    const result = { content };
 
-    return {
-      content,
-      [CLASS_NAME_KEY]: `${name}(${content.substr(0, MAX_FUNC_STR_LEN)})`
-    };
-  };
+    setCustomClassNameTo(result, `${name}(${content.substr(0, MAX_FUNC_STR_LEN)})`);
 
-  const stringifyError = value => {
-    const { name, message, columnNumber, fileName, lineNumber } = value;
-    return {
-      [CLASS_NAME_KEY]: name || 'Error',
-      name: stringifyValue(name),
-      message: stringifyValue(message),
-      columnNumber: stringifyValue(columnNumber),
-      fileName: stringifyValue(fileName),
-      lineNumber: stringifyValue(lineNumber)
-    };
-  };
+    return result;
+  });
 
-  function stringifyValue(value) {
-    if (typeof value === 'string') {
-      return JSON.stringify(value);
+  var convertMap = ((value, convertValue) => {
+    const result = {};
+
+    value.forEach((item, key) => {
+      let keyRep = convertValue(key);
+      // FIXME keys stringified for now,
+      // need different internal structure to represent non string keys
+      if (typeof keyRep !== 'string') {
+        keyRep = `${getCustomClassNameFrom(keyRep)}(${String(key)})`;
+      }
+
+      result[keyRep] = convertValue(item);
+    });
+
+    setCustomClassNameTo(result, getClassName(value));
+
+    return result;
+  });
+
+  var convertNumber = (value => `${value}`);
+
+  var convertObject = ((value, convertValue) => {
+    const result = {};
+
+    Object.keys(value).forEach(key => {
+      result[key] = convertValue(value[key]);
+    });
+
+    setCustomClassNameTo(result, getClassName(value));
+
+    return result;
+  });
+
+  var convertSet = ((value, convertValue) => {
+    const result = [];
+
+    value.forEach(item => result.push(convertValue(item)));
+
+    setCustomClassNameTo(result, getClassName(value));
+
+    return result;
+  });
+
+  var convertString = (value => JSON.stringify(value));
+
+  var convertSymbol = (value => String(value));
+
+  // Every value in JS has .constructor property
+  // use Map to store handlers for every type in this case every
+  // handler could be replaced and customizable
+
+  const types = new Map();
+
+  /**
+   * Type handler signature func(value:*, convertType:(value:*)): String|Array|Object;
+   * @param {*} constructor
+   * @param {*} handler
+   */
+  const addTypeHandler = (constructor, handler) => {
+    if (constructor && handler) {
+      types.delete(constructor);
+      types.set(constructor, handler);
     }
+  };
 
+  const hasTypeHandler = constructor => types.has(constructor);
+
+  const getTypeHandler = constructor => types.get(constructor);
+
+  const removeTypeHandler = constructor => types.delete(constructor);
+
+  const defaultTypeHandlerSelector = value => {
+    const type = getValueType(value);
+
+    return type && getTypeHandler(type);
+  };
+
+  let typeHandlerSelector = defaultTypeHandlerSelector;
+
+  /*
+   * Used to get type handler instead of getTypeHandler(), can be customized.
+   * @param {*} value
+   */
+  const selectTypeHandler = value => typeHandlerSelector(value);
+
+  /**
+   * Used to customize type selection algorythm, by default it just gets current
+   * constructor value and looks for its handler.
+   * @param {*} newSelector
+   */
+  const setTypeHandlerSelector = newSelector => {
+    typeHandlerSelector = newSelector;
+  };
+
+  addTypeHandler(Array, convertArray);
+  addTypeHandler(Boolean, convertBoolean);
+  addTypeHandler(Date, convertDate);
+  addTypeHandler(Error, convertError);
+  addTypeHandler(Function, convertFunction);
+  addTypeHandler(Map, convertMap);
+  addTypeHandler(Number, convertNumber);
+  addTypeHandler(Object, convertObject);
+  addTypeHandler(Set, convertSet);
+  addTypeHandler(String, convertString);
+  addTypeHandler(Symbol, convertSymbol);
+
+  const isString = value => {
+    switch (typeof value) {
+      case 'symbol':
+      case 'string':
+      case 'boolean':
+      case 'number':
+      case 'undefined':
+        return true;
+      default:
+        return value === null || value instanceof Date;
+    }
+  };
+
+  const toString = value => {
+    switch (typeof value) {
+      case 'symbol':
+        return convertSymbol(value);
+      case 'string':
+        return convertString(value);
+      case 'boolean':
+        return convertBoolean(value);
+      case 'number':
+        return convertNumber(value);
+      default:
+        if (value instanceof Date) {
+          return convertDate(value);
+        }
+
+        return `${value}`;
+    }
+  };
+
+  const fallbackConversion = (value, convertValue) => {
     if (isString(value)) {
       return toString(value);
     }
 
     if (value instanceof Function) {
-      return stringifyFunction(value);
+      return convertFunction(value, convertValue);
     }
 
     if (value instanceof Error) {
-      return stringifyError(value);
+      return convertError(value, convertValue);
     }
 
-    let result;
+    if (value instanceof Map) {
+      return convertMap(value, convertValue);
+    }
+
+    if (value instanceof Set) {
+      return convertSet(value, convertValue);
+    }
 
     if (value instanceof Array) {
-      result = value.map(stringifyValue);
-    } else if (value instanceof Map) {
-      result = {};
-      value.forEach((val, key) => {
-        result[key] = stringifyValue(val);
-      });
-    } else if (value instanceof Set) {
-      result = [];
-      value.forEach(val => result.push(stringifyValue(val)));
-    } else {
-      result = {};
-      Object.keys(value).forEach(key => {
-        result[key] = stringifyValue(value[key]);
-      });
+      return convertArray(value, convertValue);
     }
 
-    if (result) {
-      result[CLASS_NAME_KEY] = getClassName(value) || 'Object';
-    } else {
-      result = `${getClassName(value)}()`;
+    return convertObject(value, convertValue);
+  };
+
+  const convert = value => {
+    if (value === null || value === undefined) {
+      return `${value}`;
     }
 
-    return result;
-  }
+    const handler = selectTypeHandler(value);
+
+    if (handler) {
+      return handler(value, convert);
+    }
+
+    return fallbackConversion(value, convert);
+  };
 
   /* eslint-disable no-use-before-define */
 
@@ -200,7 +331,7 @@
 
     Object.keys(object).forEach(key => {
       const value = object[key];
-      text += `${space}${stringifyValue(key)}: `;
+      text += `${space}${convert(key)}: `;
 
       if (typeof value === 'object') {
         result.push(document.createTextNode(text));
@@ -261,7 +392,7 @@
 
       content.forEach(node => wrapper.appendChild(node));
 
-      wrapper.appendChild(document.createTextNode(`${space}${post}`));
+      wrapper.appendChild(document.createTextNode(expanded ? `${space}${post}` : post));
     };
 
     wrapper.addEventListener('click', event => {
@@ -283,13 +414,7 @@
 
   const buildContent = (content, item) => {
     content.forEach(value => {
-      let result;
-
-      if (isString(value)) {
-        result = toString(value);
-      } else {
-        result = stringifyValue(value);
-      }
+      const result = convert(value);
 
       if (typeof result === 'object') {
         item.appendChild(createUINested(result, '', true));
@@ -342,6 +467,11 @@
 
   exports.init = init;
   exports.create = create;
+  exports.addTypeHandler = addTypeHandler;
+  exports.getTypeHandler = getTypeHandler;
+  exports.hasTypeHandler = hasTypeHandler;
+  exports.removeTypeHandler = removeTypeHandler;
+  exports.setTypeHandlerSelector = setTypeHandlerSelector;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -14,16 +14,23 @@ export const SUCCESS_TYPE = 'success';
 export const getClassName = (value) => {
   if (!value) return '';
 
-  const match = String(value.constructor).match(/^(?:[\w\s\d_$])+\s+([\w\d_$]+)\s*[^\1]/);
+  const match = String(value.constructor).match(
+    /^(?:[\w\s\d_$])+\s+([\w\d_$]+)\s*[^\1]/,
+  );
   // .match(/^(?:(?:[\w\s\d_$])+\s+|)([\w\d_$]+)\s*[^\2]/) - returns type if anonymous
 
   return match ? match[1] : '';
 };
 
+export const setCustomClassNameTo = (data, className) =>
+  (data[CLASS_NAME_KEY] = className);
+
+export const getCustomClassNameFrom = (data) => data[CLASS_NAME_KEY] || '';
+
 export const getStringWrap = (value) => {
   let pre;
   let post;
-  const name = value[CLASS_NAME_KEY] || '';
+  const name = getCustomClassNameFrom(value);
 
   if (value instanceof Array) {
     pre = '[';
@@ -42,4 +49,12 @@ export const removeAllChildren = (target) => {
   while (target.firstChild) {
     target.removeChild(target.firstChild);
   }
+};
+
+export const getValueType = (value) => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  return value.constructor;
 };
