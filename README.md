@@ -22,5 +22,10 @@ All the styles in `console.css` file.
 > It does not dig into prototype chain and displays only own properties for object.
 
 To use on platform like [jsfiddle.net](https://jsfiddle.net/), add these files:
+Using UNPKG:
+* [https://unpkg.com/@actualwave/dom-console@latest/console.css](https://unpkg.com/@actualwave/dom-console@latest/console.css)
+* [https://unpkg.com/@actualwave/dom-console@latest/console.js](https://unpkg.com/@actualwave/dom-console@latest/console.js)
+
+Using GitHub as CDN:
 * [https://rawgit.com/burdiuz/js-dom-console/master/console.css](https://rawgit.com/burdiuz/js-dom-console/master/console.css)
 * [https://rawgit.com/burdiuz/js-dom-console/master/console.js](https://rawgit.com/burdiuz/js-dom-console/master/console.js)

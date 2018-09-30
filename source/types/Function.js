@@ -1,4 +1,6 @@
-import { MAX_FUNC_STR_LEN, setCustomClassNameTo, getClassName } from '../utils';
+import { getClassName } from '@actualwave/get-class';
+
+import { MAX_FUNC_STR_LEN, setCustomClassNameTo } from '../utils';
 
 export default (value) => {
   const content = String(value);

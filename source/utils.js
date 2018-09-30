@@ -11,17 +11,6 @@ export const WARNING_TYPE = 'warning';
 export const ERROR_TYPE = 'error';
 export const SUCCESS_TYPE = 'success';
 
-export const getClassName = (value) => {
-  if (!value) return '';
-
-  const match = String(value.constructor).match(
-    /^(?:[\w\s\d_$])+\s+([\w\d_$]+)\s*[^\1]/,
-  );
-  // .match(/^(?:(?:[\w\s\d_$])+\s+|)([\w\d_$]+)\s*[^\2]/) - returns type if anonymous
-
-  return match ? match[1] : '';
-};
-
 export const setCustomClassNameTo = (data, className) =>
   (data[CLASS_NAME_KEY] = className);
 

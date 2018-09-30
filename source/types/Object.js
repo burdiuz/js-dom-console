@@ -1,4 +1,6 @@
-import { setCustomClassNameTo, getClassName } from '../utils';
+import { getClassName } from '@actualwave/get-class';
+
+import { setCustomClassNameTo } from '../utils';
 
 export default (value, convertValue) => {
   const result = {};

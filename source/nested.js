@@ -1,6 +1,5 @@
 /* eslint-disable no-use-before-define */
 import { SPACE_LEVEL, getStringWrap, removeAllChildren } from './utils';
-import { convert } from './data';
 
 const setExpandIconSymbol = (icon, expanded) => {
   icon.innerHTML = expanded ? '-' : '+';
@@ -47,7 +46,7 @@ const createUINestedObjectContent = (object, space) => {
 
   Object.keys(object).forEach((key) => {
     const value = object[key];
-    text += `${space}${convert(key)}: `;
+    text += `${space}${key}: `;
 
     if (typeof value === 'object') {
       result.push(document.createTextNode(text));

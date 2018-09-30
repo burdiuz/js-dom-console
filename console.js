@@ -17,15 +17,6 @@
   const ERROR_TYPE = 'error';
   const SUCCESS_TYPE = 'success';
 
-  const getClassName = value => {
-    if (!value) return '';
-
-    const match = String(value.constructor).match(/^(?:[\w\s\d_$])+\s+([\w\d_$]+)\s*[^\1]/);
-    // .match(/^(?:(?:[\w\s\d_$])+\s+|)([\w\d_$]+)\s*[^\2]/) - returns type if anonymous
-
-    return match ? match[1] : '';
-  };
-
   const setCustomClassNameTo = (data, className) => data[CLASS_NAME_KEY] = className;
 
   const getCustomClassNameFrom = data => data[CLASS_NAME_KEY] || '';
@@ -62,10 +53,63 @@
     return value.constructor;
   };
 
+  function unwrapExports (x) {
+  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+  }
+
+  function createCommonjsModule(fn, module) {
+  	return module = { exports: {} }, fn(module, module.exports), module.exports;
+  }
+
+  var getClass_1 = createCommonjsModule(function (module, exports) {
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+  const getClass = (target) => {
+    if(target === null || target === undefined) {
+      return undefined;
+    }
+    
+    const proto = Object.getPrototypeOf(target);
+    
+    if (typeof proto === 'object') {
+      return proto.constructor;
+    }
+
+    return proto;
+  };
+
+  const getParentClass = (target) => {
+    const def = getClass(target);
+    
+    return def && Object.getPrototypeOf(def);
+  };
+
+  const getClassName = (value) => {
+    if (!value) return '';
+
+    const match = String(getClass(value)).match(
+      /^(?:[^\(\{\s]*)(?:class|function)\s+([\w\d_$]+)(?:\s*\(|\s*\{|\s+extends)/,
+    );
+
+    return match ? match[1] : '';
+  };
+
+  exports.getClassName = getClassName;
+  exports.getParentClass = getParentClass;
+  exports.getClass = getClass;
+  exports.default = getClass;
+  });
+
+  unwrapExports(getClass_1);
+  var getClass_2 = getClass_1.getClassName;
+  var getClass_3 = getClass_1.getParentClass;
+  var getClass_4 = getClass_1.getClass;
+
   var convertArray = ((value, convertValue) => {
     const result = value.map(convertValue);
 
-    setCustomClassNameTo(result, getClassName(value));
+    setCustomClassNameTo(result, getClass_2(value));
 
     return result;
   });
@@ -96,7 +140,7 @@
       return content;
     }
 
-    const name = getClassName(value) || 'Function';
+    const name = getClass_2(value) || 'Function';
     const result = { content };
 
     setCustomClassNameTo(result, `${name}(${content.substr(0, MAX_FUNC_STR_LEN)})`);
@@ -118,7 +162,7 @@
       result[keyRep] = convertValue(item);
     });
 
-    setCustomClassNameTo(result, getClassName(value));
+    setCustomClassNameTo(result, getClass_2(value));
 
     return result;
   });
@@ -132,7 +176,7 @@
       result[key] = convertValue(value[key]);
     });
 
-    setCustomClassNameTo(result, getClassName(value));
+    setCustomClassNameTo(result, getClass_2(value));
 
     return result;
   });
@@ -142,7 +186,7 @@
 
     value.forEach(item => result.push(convertValue(item)));
 
-    setCustomClassNameTo(result, getClassName(value));
+    setCustomClassNameTo(result, getClass_2(value));
 
     return result;
   });
@@ -331,7 +375,7 @@
 
     Object.keys(object).forEach(key => {
       const value = object[key];
-      text += `${space}${convert(key)}: `;
+      text += `${space}${key}: `;
 
       if (typeof value === 'object') {
         result.push(document.createTextNode(text));
@@ -414,6 +458,12 @@
 
   const buildContent = (content, item) => {
     content.forEach(value => {
+      if (typeof value === 'string') {
+        // shortcut for log strings to not wrap them with quotes
+        item.appendChild(createSimpleValue(value));
+        return;
+      }
+
       const result = convert(value);
 
       if (typeof result === 'object') {
