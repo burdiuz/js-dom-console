@@ -39,11 +39,3 @@ export const removeAllChildren = (target) => {
     target.removeChild(target.firstChild);
   }
 };
-
-export const getValueType = (value) => {
-  if (value === null || value === undefined) {
-    return undefined;
-  }
-
-  return value.constructor;
-};

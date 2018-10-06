@@ -1,4 +1,5 @@
-import { getValueType } from '../utils';
+import getClass from '@actualwave/get-class';
+
 import convertArray from './Array';
 import convertBoolean from './Boolean';
 import convertDate from './Date';
@@ -36,7 +37,7 @@ export const getTypeHandler = (constructor) => types.get(constructor);
 export const removeTypeHandler = (constructor) => types.delete(constructor);
 
 export const defaultTypeHandlerSelector = (value) => {
-  const type = getValueType(value);
+  const type = getClass(value);
 
   return type && getTypeHandler(type);
 };

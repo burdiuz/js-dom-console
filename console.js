@@ -45,14 +45,6 @@
     }
   };
 
-  const getValueType = value => {
-    if (value === null || value === undefined) {
-      return undefined;
-    }
-
-    return value.constructor;
-  };
-
   function unwrapExports (x) {
   	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
   }
@@ -68,6 +60,15 @@
   const getClass = (target) => {
     if(target === null || target === undefined) {
       return undefined;
+    }
+    
+    const constructor = target.constructor;
+    
+    if(
+      typeof constructor === 'function'
+      && target instanceof constructor
+    ) {
+      return target.constructor;
     }
     
     const proto = Object.getPrototypeOf(target);
@@ -87,12 +88,10 @@
 
   const getClassName = (value) => {
     if (!value) return '';
+    
+    const valueClass = getClass(value);
 
-    const match = String(getClass(value)).match(
-      /^(?:[^\(\{\s]*)(?:class|function)\s+([\w\d_$]+)(?:\s*\(|\s*\{|\s+extends)/,
-    );
-
-    return match ? match[1] : '';
+    return valueClass ? valueClass.name : '';
   };
 
   exports.getClassName = getClassName;
@@ -101,7 +100,7 @@
   exports.default = getClass;
   });
 
-  unwrapExports(getClass_1);
+  var getClass = unwrapExports(getClass_1);
   var getClass_2 = getClass_1.getClassName;
   var getClass_3 = getClass_1.getParentClass;
   var getClass_4 = getClass_1.getClass;
@@ -220,7 +219,7 @@
   const removeTypeHandler = constructor => types.delete(constructor);
 
   const defaultTypeHandlerSelector = value => {
-    const type = getValueType(value);
+    const type = getClass(value);
 
     return type && getTypeHandler(type);
   };
