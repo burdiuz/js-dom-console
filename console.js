@@ -61,34 +61,34 @@
     if(target === null || target === undefined) {
       return undefined;
     }
-    
+
     const constructor = target.constructor;
-    
+
     if(
       typeof constructor === 'function'
       && target instanceof constructor
     ) {
       return target.constructor;
     }
-    
+
     const proto = Object.getPrototypeOf(target);
-    
-    if (typeof proto === 'object') {
+
+    if (proto && typeof proto === 'object') {
       return proto.constructor;
     }
 
-    return proto;
+    return proto || Object;
   };
 
   const getParentClass = (target) => {
     const def = getClass(target);
-    
+
     return def && Object.getPrototypeOf(def);
   };
 
   const getClassName = (value) => {
     if (!value) return '';
-    
+
     const valueClass = getClass(value);
 
     return valueClass ? valueClass.name : '';
