@@ -168,7 +168,7 @@
 
   var convertNumber = (value => `${value}`);
 
-  var convertObject = ((value, convertValue) => {
+  var convertObject = ((value, convertValue, refs) => {
     const result = {};
 
     Object.keys(value).forEach(key => {
@@ -253,6 +253,70 @@
   addTypeHandler(String, convertString);
   addTypeHandler(Symbol, convertSymbol);
 
+  var closureValue = createCommonjsModule(function (module, exports) {
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+  const singleValueFactory = (defaultValue = null, valueFormatter = (value) => value) => {
+    let value = defaultValue;
+
+    return {
+      getDefault: () => defaultValue,
+      get: () => value,
+      set: (newValue = defaultValue) => {
+        value = valueFormatter(newValue);
+      },
+    };
+  };
+
+  const valuesMapFactory = (defaults = new Map(), valueFormatter = (key, value) => value) => {
+    const defaultValues = new Map(defaults);
+    const getDefault = () => new Map(defaultValues);
+
+    const values = getDefault();
+
+    return {
+      values,
+      getDefault,
+      copy: () => new Map(values),
+      delete: (key) => values.delete(key),
+      has: (key) => values.has(key),
+      set: (key, value) => values.set(key, valueFormatter(key, value)),
+      get: (key) => values.get(key),
+    };
+  };
+
+  const valuesSetFactory = (defaults = new Set(), valueFormatter = (value) => value) => {
+    const defaultValues = new Set(defaults);
+    const getDefault = () => new Set(defaultValues);
+
+    const values = getDefault();
+
+    return {
+      values,
+      getDefault,
+      get: () => new Set(values),
+      delete: (value) => values.delete(value),
+      has: (value) => values.has(value),
+      add: (value) => values.add(valueFormatter(value)),
+    };
+  };
+
+  exports.singleValueFactory = singleValueFactory;
+  exports.valuesMapFactory = valuesMapFactory;
+  exports.valuesSetFactory = valuesSetFactory;
+  });
+
+  unwrapExports(closureValue);
+  var closureValue_1 = closureValue.singleValueFactory;
+  var closureValue_2 = closureValue.valuesMapFactory;
+  var closureValue_3 = closureValue.valuesSetFactory;
+
+  const {
+    get: getMaxNesingDepth,
+    set: setMaxNesingDepth
+  } = closureValue_1(2);
+
   const isString = value => {
     switch (typeof value) {
       case 'symbol':
@@ -285,46 +349,66 @@
     }
   };
 
-  const fallbackConversion = (value, convertValue) => {
+  const fallbackConversion = (value, convertValue, refs) => {
     if (isString(value)) {
       return toString(value);
     }
 
     if (value instanceof Function) {
-      return convertFunction(value, convertValue);
+      return convertFunction(value, convertValue, refs);
     }
 
     if (value instanceof Error) {
-      return convertError(value, convertValue);
+      return convertError(value, convertValue, refs);
     }
 
     if (value instanceof Map) {
-      return convertMap(value, convertValue);
+      return convertMap(value, convertValue, refs);
     }
 
     if (value instanceof Set) {
-      return convertSet(value, convertValue);
+      return convertSet(value, convertValue, refs);
     }
 
     if (value instanceof Array) {
-      return convertArray(value, convertValue);
+      return convertArray(value, convertValue, refs);
     }
 
-    return convertObject(value, convertValue);
+    return convertObject(value, convertValue, refs);
   };
 
-  const convert = value => {
+  const convert = (value, level = 1, refs = new Map()) => {
     if (value === null || value === undefined) {
       return `${value}`;
     }
 
-    const handler = selectTypeHandler(value);
+    const maxLevel = getMaxNesingDepth();
 
-    if (handler) {
-      return handler(value, convert);
+    if (level > maxLevel) {
+      return toString(value);
     }
 
-    return fallbackConversion(value, convert);
+    const complex = !isString(value);
+
+    if (complex && refs.has(value)) {
+      return refs.get(value);
+    }
+
+    const handler = selectTypeHandler(value);
+    const nextConvert = propValue => convert(propValue, level + 1, refs);
+    let result;
+
+    if (handler) {
+      result = handler(value, nextConvert, refs);
+    }
+
+    result = fallbackConversion(value, nextConvert, refs);
+
+    if (complex) {
+      refs.set(value, result);
+    }
+
+    return result;
   };
 
   /* eslint-disable no-use-before-define */
@@ -521,6 +605,8 @@
   exports.hasTypeHandler = hasTypeHandler;
   exports.removeTypeHandler = removeTypeHandler;
   exports.setTypeHandlerSelector = setTypeHandlerSelector;
+  exports.getMaxNesingDepth = getMaxNesingDepth;
+  exports.setMaxNesingDepth = setMaxNesingDepth;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

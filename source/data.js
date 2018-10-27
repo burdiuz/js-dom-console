@@ -10,6 +10,8 @@ import convertSet from './types/Set';
 import convertString from './types/String';
 import convertSymbol from './types/Symbol';
 
+import { getMaxNesingDepth } from './max-depth';
+
 import { selectTypeHandler } from './types';
 
 export const isString = (value) => {
@@ -44,44 +46,64 @@ export const toString = (value) => {
   }
 };
 
-const fallbackConversion = (value, convertValue) => {
+const fallbackConversion = (value, convertValue, refs) => {
   if (isString(value)) {
     return toString(value);
   }
 
   if (value instanceof Function) {
-    return convertFunction(value, convertValue);
+    return convertFunction(value, convertValue, refs);
   }
 
   if (value instanceof Error) {
-    return convertError(value, convertValue);
+    return convertError(value, convertValue, refs);
   }
 
   if (value instanceof Map) {
-    return convertMap(value, convertValue);
+    return convertMap(value, convertValue, refs);
   }
 
   if (value instanceof Set) {
-    return convertSet(value, convertValue);
+    return convertSet(value, convertValue, refs);
   }
 
   if (value instanceof Array) {
-    return convertArray(value, convertValue);
+    return convertArray(value, convertValue, refs);
   }
 
-  return convertObject(value, convertValue);
+  return convertObject(value, convertValue, refs);
 };
 
-export const convert = (value) => {
+export const convert = (value, level = 1, refs = new Map()) => {
   if (value === null || value === undefined) {
     return `${value}`;
   }
 
-  const handler = selectTypeHandler(value);
+  const maxLevel = getMaxNesingDepth();
 
-  if (handler) {
-    return handler(value, convert);
+  if (level > maxLevel) {
+    return toString(value);
   }
 
-  return fallbackConversion(value, convert);
+  const complex = !isString(value);
+
+  if (complex && refs.has(value)) {
+    return refs.get(value);
+  }
+
+  const handler = selectTypeHandler(value);
+  const nextConvert = (propValue) => convert(propValue, level + 1, refs);
+  let result;
+
+  if (handler) {
+    result = handler(value, nextConvert, refs);
+  }
+
+  result = fallbackConversion(value, nextConvert, refs);
+
+  if (complex) {
+    refs.set(value, result);
+  }
+
+  return result;
 };

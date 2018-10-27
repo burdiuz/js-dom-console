@@ -2,7 +2,7 @@ import { getClassName } from '@actualwave/get-class';
 
 import { setCustomClassNameTo } from '../utils';
 
-export default (value, convertValue) => {
+export default (value, convertValue, refs) => {
   const result = {};
 
   Object.keys(value).forEach((key) => {

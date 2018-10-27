@@ -12,6 +12,7 @@ import {
   removeTypeHandler,
   setTypeHandlerSelector,
 } from './types';
+import { getMaxNesingDepth, setMaxNesingDepth } from './max-depth';
 import { buildContent } from './dom';
 
 export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
@@ -62,4 +63,6 @@ export {
   hasTypeHandler,
   removeTypeHandler,
   setTypeHandlerSelector,
+  getMaxNesingDepth,
+  setMaxNesingDepth,
 };
