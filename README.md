@@ -4,6 +4,8 @@
 ### TODOs
 1. Add display for HTML nodes/elements(via outerHTML).
 2. Add proper display for Map keys
+3. Implement depth or rendering for objects with nested objects
+4. Handle circular dependencies
 
 Small UI helper to display console output on the page.
 I've made it just to [make nice demos](https://jsfiddle.net/actualwave/wa45vyz8/).
