@@ -45,6 +45,13 @@
 
 .ui-console-clickable {
   cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: #cccccc;
+}
+
+.ui-console-clickable:hover {
+  background-color: #eeeeee;
+  text-decoration-color: #666666;
 }
 
 .ui-console-item-info {

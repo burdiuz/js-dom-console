@@ -1,5 +1,11 @@
 /* eslint-disable no-use-before-define */
-import { SPACE_LEVEL, getStringWrap, removeAllChildren } from './utils';
+import {
+  SPACE_LEVEL,
+  getStringWrap,
+  removeAllChildren,
+  iterateStorage,
+  isNested,
+} from './utils';
 
 const setExpandIconSymbol = (icon, expanded) => {
   icon.innerHTML = expanded ? '-' : '+';
@@ -23,7 +29,7 @@ const createUINestedArrayContent = (list, space) => {
   list.forEach((value) => {
     text += space;
 
-    if (typeof value === 'object') {
+    if (isNested(value)) {
       result.push(document.createTextNode(text));
       text = '';
       result.push(createUINested(value, space));
@@ -40,18 +46,27 @@ const createUINestedArrayContent = (list, space) => {
   return result;
 };
 
-const createUINestedObjectContent = (object, space) => {
+const createUINestedObjectContent = (storage, space) => {
   const result = [];
   let text = '\n';
 
-  Object.keys(object).forEach((key) => {
-    const value = object[key];
-    text += `${space}${key}: `;
+  iterateStorage(storage, (value, key) => {
+    text += `${space}`;
 
-    if (typeof value === 'object') {
+    if (isNested(key)) {
+      result.push(document.createTextNode(`${text}[`));
+      result.push(createUINested(key, space));
+      text = ']';
+    } else {
+      text += key;
+    }
+
+    text += ': ';
+
+    if (isNested(value)) {
       result.push(document.createTextNode(text));
-      text = '';
       result.push(createUINested(value, space));
+      text = '';
     } else {
       text += value;
     }
@@ -85,15 +100,19 @@ export function createUINested(value, space = '', initExpanded = false) {
   const icon = createExpandIcon(expanded);
   const wrapper = document.createElement('span');
 
-  wrapper.className = 'ui-console-clickable';
+  wrapper.className = 'ui-console-nested-wrapper';
+
+  const link = document.createElement('span');
+  link.className = 'ui-console-clickable';
+  link.appendChild(icon);
+  link.appendChild(document.createTextNode(pre));
 
   const drawContents = () => {
     let content;
 
     removeAllChildren(wrapper);
 
-    wrapper.appendChild(icon);
-    wrapper.appendChild(document.createTextNode(pre));
+    wrapper.appendChild(link);
 
     if (expanded) {
       if (!contentExpanded) {
@@ -112,7 +131,7 @@ export function createUINested(value, space = '', initExpanded = false) {
     );
   };
 
-  wrapper.addEventListener('click', (event) => {
+  link.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
 

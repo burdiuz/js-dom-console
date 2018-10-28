@@ -6,10 +6,10 @@
 
   // Assigned to an object, when rendering, if exists, will wrap content, like
   // Map{...} or Set[...]
-  const CLASS_NAME_KEY = Symbol('class-name');
+  const CLASS_NAME_KEY = '@class-name';
 
   const SPACE_LEVEL = '  ';
-  const MAX_FUNC_STR_LEN = 50;
+  const MAX_FUNC_STR_LEN = 30;
 
   const INFO_TYPE = 'info';
   const LOG_TYPE = 'log';
@@ -44,6 +44,20 @@
       target.removeChild(target.firstChild);
     }
   };
+
+  const canPassAsIs = value => typeof value === 'string';
+
+  const validKeyRgx = /^[\w_$][\w\d_$]*$/i;
+
+  const keyNeedsConversion = key => !(canPassAsIs(key) && validKeyRgx.test(key));
+
+  const isNested = value => typeof value === 'object';
+
+  const createComplexDataStorage = () => new Map();
+
+  const addToStorage = (storage, key, value) => storage.set(key, value);
+
+  const iterateStorage = (storage, handler) => storage.forEach(handler);
 
   function unwrapExports (x) {
   	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -119,13 +133,14 @@
 
   var convertError = ((value, convertValue) => {
     const { name, message, columnNumber, fileName, lineNumber } = value;
-    const result = {
-      name: convertValue(name),
-      message: convertValue(message),
-      columnNumber: convertValue(columnNumber),
-      fileName: convertValue(fileName),
-      lineNumber: convertValue(lineNumber)
-    };
+
+    const result = createComplexDataStorage();
+
+    addToStorage(result, 'name', convertValue(name));
+    addToStorage(result, 'message', convertValue(message));
+    addToStorage(result, 'columnNumber', convertValue(columnNumber));
+    addToStorage(result, 'fileName', convertValue(fileName));
+    addToStorage(result, 'lineNumber', convertValue(lineNumber));
 
     setCustomClassNameTo(result, name || 'Error');
 
@@ -139,26 +154,34 @@
       return content;
     }
 
-    const name = getClass_2(value) || 'Function';
-    const result = { content };
+    const type = getClass_2(value) || 'Function';
 
-    setCustomClassNameTo(result, `${name}(${content.substr(0, MAX_FUNC_STR_LEN)})`);
+    let { name } = value;
+
+    if (!name) {
+      name = content.substr(content.substr(0, 9) === 'function ' ? 9 : 0, MAX_FUNC_STR_LEN);
+    }
+
+    const result = createComplexDataStorage();
+    addToStorage(result, 'content', content);
+
+    setCustomClassNameTo(result,
+    // FIXME almost every function starts with "function ", remove this from short string
+    `${type}(${name})`);
 
     return result;
   });
 
   var convertMap = ((value, convertValue) => {
-    const result = {};
+    const result = createComplexDataStorage();
 
     value.forEach((item, key) => {
-      let keyRep = convertValue(key);
-      // FIXME keys stringified for now,
-      // need different internal structure to represent non string keys
-      if (typeof keyRep !== 'string') {
-        keyRep = `${getCustomClassNameFrom(keyRep)}(${String(key)})`;
-      }
-
-      result[keyRep] = convertValue(item);
+      /*
+      Do not use keyNeedsConversion() here, because Map may hold values of
+      different types as keys and string should be quoted, otherwise it may be
+      unclear -- what you see string true or boolean true as key.
+      */
+      addToStorage(result, convertValue(key), convertValue(item));
     });
 
     setCustomClassNameTo(result, getClass_2(value));
@@ -168,11 +191,11 @@
 
   var convertNumber = (value => `${value}`);
 
-  var convertObject = ((value, convertValue, refs) => {
-    const result = {};
+  var convertObject = ((value, convertValue) => {
+    const result = createComplexDataStorage();
 
     Object.keys(value).forEach(key => {
-      result[key] = convertValue(value[key]);
+      addToStorage(result, keyNeedsConversion(key) ? convertValue(key) : key, convertValue(value[key]));
     });
 
     setCustomClassNameTo(result, getClass_2(value));
@@ -435,7 +458,7 @@
     list.forEach(value => {
       text += space;
 
-      if (typeof value === 'object') {
+      if (isNested(value)) {
         result.push(document.createTextNode(text));
         text = '';
         result.push(createUINested(value, space));
@@ -452,18 +475,27 @@
     return result;
   };
 
-  const createUINestedObjectContent = (object, space) => {
+  const createUINestedObjectContent = (storage, space) => {
     const result = [];
     let text = '\n';
 
-    Object.keys(object).forEach(key => {
-      const value = object[key];
-      text += `${space}${key}: `;
+    iterateStorage(storage, (value, key) => {
+      text += `${space}`;
 
-      if (typeof value === 'object') {
+      if (isNested(key)) {
+        result.push(document.createTextNode(`${text}[`));
+        result.push(createUINested(key, space));
+        text = ']';
+      } else {
+        text += key;
+      }
+
+      text += ': ';
+
+      if (isNested(value)) {
         result.push(document.createTextNode(text));
-        text = '';
         result.push(createUINested(value, space));
+        text = '';
       } else {
         text += value;
       }
@@ -497,15 +529,19 @@
     const icon = createExpandIcon(expanded);
     const wrapper = document.createElement('span');
 
-    wrapper.className = 'ui-console-clickable';
+    wrapper.className = 'ui-console-nested-wrapper';
+
+    const link = document.createElement('span');
+    link.className = 'ui-console-clickable';
+    link.appendChild(icon);
+    link.appendChild(document.createTextNode(pre));
 
     const drawContents = () => {
       let content;
 
       removeAllChildren(wrapper);
 
-      wrapper.appendChild(icon);
-      wrapper.appendChild(document.createTextNode(pre));
+      wrapper.appendChild(link);
 
       if (expanded) {
         if (!contentExpanded) {
@@ -522,7 +558,7 @@
       wrapper.appendChild(document.createTextNode(expanded ? `${space}${post}` : post));
     };
 
-    wrapper.addEventListener('click', event => {
+    link.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
 
@@ -541,7 +577,7 @@
 
   const buildContent = (content, item) => {
     content.forEach(value => {
-      if (typeof value === 'string') {
+      if (canPassAsIs(value)) {
         // shortcut for log strings to not wrap them with quotes
         item.appendChild(createSimpleValue(value));
         return;
@@ -549,7 +585,7 @@
 
       const result = convert(value);
 
-      if (typeof result === 'object') {
+      if (isNested(result)) {
         item.appendChild(createUINested(result, '', true));
       } else {
         item.appendChild(createSimpleValue(result));
