@@ -1,11 +1,12 @@
 import { convert } from './data';
+import { isNested, canPassAsIs } from './utils';
 import { createUINested } from './nested';
 
 const createSimpleValue = (value) => document.createTextNode(`${value} `);
 
 export const buildContent = (content, item) => {
   content.forEach((value) => {
-    if (typeof value === 'string') {
+    if (canPassAsIs(value)) {
       // shortcut for log strings to not wrap them with quotes
       item.appendChild(createSimpleValue(value));
       return;
@@ -13,7 +14,7 @@ export const buildContent = (content, item) => {
 
     const result = convert(value);
 
-    if (typeof result === 'object') {
+    if (isNested(result)) {
       item.appendChild(createUINested(result, '', true));
     } else {
       item.appendChild(createSimpleValue(result));

@@ -24,13 +24,26 @@
   Msg.log([{ name: 'obj-1' }, { name: 'obj-2' }, { name: 'obj-3' }, { name: 'obj-4' }]);
   Msg.log(new Set([{ name: 'obj-1' }, { name: 'obj-2' }, { name: 'obj-3' }, { name: 'obj-4' }]));
   Msg.log(new Map([
-    [ { type: 'key' }, { type: 'value' } ],
-    [ 'string-key', { name: 'obj-1' } ],
-    [ 4, { name: 'obj-2' } ],
-    [ true, { name: 'obj-3' } ],
-    [ () => null, { name: 'obj-4' } ],
-    [ new Date(), { name: 'obj-5' } ],
+    [{ type: 'key' }, { type: 'value' }],
+    ['string-key', { name: 'obj-1' }],
+    [4, { name: 'obj-2' }],
+    [true, { name: 'obj-3' }],
+    [() => null, { name: 'obj-4' }],
+    [new Date(), { name: 'obj-5' }],
   ]));
+
+  const obj = {
+    first: '1',
+    second: '2',
+    third: '3',
+  };
+
+  Msg.log(obj);
+
+  obj.fourth = Object.assign({}, obj);
+  obj.fifth = obj;
+
+  Msg.log(obj);
 </script>
 
 </html>

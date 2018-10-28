@@ -1,9 +1,9 @@
 // Assigned to an object, when rendering, if exists, will wrap content, like
 // Map{...} or Set[...]
-export const CLASS_NAME_KEY = Symbol('class-name');
+export const CLASS_NAME_KEY = '@class-name';
 
 export const SPACE_LEVEL = '  ';
-export const MAX_FUNC_STR_LEN = 50;
+export const MAX_FUNC_STR_LEN = 30;
 
 export const INFO_TYPE = 'info';
 export const LOG_TYPE = 'log';
@@ -39,3 +39,21 @@ export const removeAllChildren = (target) => {
     target.removeChild(target.firstChild);
   }
 };
+
+export const canPassAsIs = (value) => typeof value === 'string';
+
+const validKeyRgx = /^[\w_$][\w\d_$]*$/i;
+
+export const keyNeedsConversion = (key) => !(canPassAsIs(key) && validKeyRgx.test(key));
+
+export const isNested = (value) => typeof value === 'object';
+
+export const createComplexDataStorage = () => new Map();
+
+export const isStorage = (storage) => storage instanceof Map;
+
+export const addToStorage = (storage, key, value) => storage.set(key, value);
+
+export const iterateStorage = (storage, handler) => storage.forEach(handler);
+
+export const getStorageSize = (storage) => storage.size;

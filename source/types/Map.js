@@ -1,19 +1,21 @@
 import { getClassName } from '@actualwave/get-class';
 
-import { setCustomClassNameTo, getCustomClassNameFrom } from '../utils';
+import {
+  setCustomClassNameTo,
+  createComplexDataStorage,
+  addToStorage,
+} from '../utils';
 
 export default (value, convertValue) => {
-  const result = {};
+  const result = createComplexDataStorage();
 
   value.forEach((item, key) => {
-    let keyRep = convertValue(key);
-    // FIXME keys stringified for now,
-    // need different internal structure to represent non string keys
-    if (typeof keyRep !== 'string') {
-      keyRep = `${getCustomClassNameFrom(keyRep)}(${String(key)})`;
-    }
-
-    result[keyRep] = convertValue(item);
+    /*
+    Do not use keyNeedsConversion() here, because Map may hold values of
+    different types as keys and string should be quoted, otherwise it may be
+    unclear -- what you see string true or boolean true as key.
+    */
+    addToStorage(result, convertValue(key), convertValue(item));
   });
 
   setCustomClassNameTo(result, getClassName(value));
