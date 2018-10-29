@@ -1,6 +1,6 @@
 import { utils } from '@actualwave/log-data-renderer';
 
-const { isList, getCustomClassNameFrom } = utils;
+const { isList, getListSize, getNestedWraps, getCustomClassNameFrom } = utils;
 
 export const SPACE_LEVEL = '  ';
 
@@ -11,21 +11,17 @@ export const ERROR_TYPE = 'error';
 export const SUCCESS_TYPE = 'success';
 
 export const getStringWrap = (value) => {
-  let pre;
-  let post;
+  const wraps = getNestedWraps(value);
+
   const name = getCustomClassNameFrom(value);
 
   if (isList(value)) {
-    pre = '[';
-    post = ']';
+    wraps.pre = `${name}(${getListSize(value)})${wraps.pre}`;
   } else {
-    pre = '{';
-    post = '}';
+    wraps.pre = `${name}${wraps.pre}`;
   }
 
-  pre = `${name}${pre}`;
-
-  return { pre, post };
+  return wraps;
 };
 
 export const removeAllChildren = (target) => {

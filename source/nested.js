@@ -2,7 +2,16 @@
 import { utils } from '@actualwave/log-data-renderer';
 import { SPACE_LEVEL, getStringWrap, removeAllChildren } from './utils';
 
-const { iterateStorage, isNested, isList, iterateList } = utils;
+const {
+  iterateStorage,
+  isNested,
+  isList,
+  iterateList,
+  getNestedShortContent,
+  getNestedWraps,
+  getListSize,
+  getStorageSize,
+} = utils;
 
 const setExpandIconSymbol = (icon, expanded) => {
   icon.innerHTML = expanded ? '-' : '+';
@@ -17,7 +26,15 @@ const createExpandIcon = (expanded) => {
   return icon;
 };
 
-const createCollapsedContent = () => [document.createTextNode(' ... ')];
+const createCollapsedContent = (value, size) => {
+  let content = getNestedShortContent(value);
+
+  if (content === undefined) {
+    content = size ? ' ... ' : '';
+  }
+
+  return [document.createTextNode(content)];
+};
 
 const createUINestedArrayContent = (list, space) => {
   const result = [];
@@ -89,10 +106,10 @@ const createUINestedContent = (value, initSpace) => {
 };
 
 export function createUINested(value, space = '', initExpanded = false) {
-  let expanded = initExpanded;
+  const size = isList(value) ? getListSize(value) : getStorageSize(value);
+  let expanded = initExpanded && !!size;
   let contentExpanded;
-  const contentCollapsed = createCollapsedContent();
-
+  const contentCollapsed = createCollapsedContent(value, size);
   const { pre, post } = getStringWrap(value);
   const icon = createExpandIcon(expanded);
   const wrapper = document.createElement('span');

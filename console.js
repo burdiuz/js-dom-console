@@ -135,37 +135,34 @@
 
 	// Assigned to an object, when rendering, if exists, will wrap content, like
 	// Map{...} or Set[...]
-	const CLASS_NAME_KEY = 'className';
 	const MAX_FUNC_STR_LEN = 30;
-	const setCustomClassNameTo = (data, className) => data[CLASS_NAME_KEY] = className;
-	const getCustomClassNameFrom = data => data[CLASS_NAME_KEY] || '';
-	const getStringWrap = value => {
-	  let pre;
-	  let post;
-	  const name = getCustomClassNameFrom(value);
-
-	  if (value instanceof Array) {
-	    pre = '[';
-	    post = ']';
-	  } else {
-	    pre = '{';
-	    post = '}';
-	  }
-
-	  pre = `${name}${pre}`;
-	  return {
-	    pre,
-	    post
-	  };
-	};
+	const setCustomClassNameTo = (data, className) => data.className = className;
+	const getCustomClassNameFrom = data => data.className || '';
 	const canPassAsIs = value => typeof value === 'string';
 	const validKeyRgx = /^[\w_$][\w\d_$]*$/i;
 	const keyNeedsConversion = key => !(canPassAsIs(key) && validKeyRgx.test(key));
 	const isNested = value => value && typeof value === 'object';
+	const setNestedWraps = (value, pre, post) => {
+	  value.pre = pre;
+	  value.post = post;
+	};
+	const getNestedWraps = ({
+	  pre,
+	  post
+	}) => ({
+	  pre,
+	  post
+	});
+	const setNestedShortContent = (value, short) => {
+	  value.short = short;
+	};
+	const getNestedShortContent = value => value.short;
 	const isList = target => isNested(target) && target.type === 'list';
 	const createList = () => ({
 	  type: 'list',
-	  values: []
+	  values: [],
+	  pre: '[',
+	  post: ']'
 	});
 	const addToList = ({
 	  values
@@ -180,7 +177,9 @@
 	const createStorage = () => ({
 	  type: 'storage',
 	  keys: [],
-	  values: []
+	  values: [],
+	  pre: '{',
+	  post: '}'
 	});
 	const addToStorage = ({
 	  keys,
@@ -201,14 +200,16 @@
 	}) => keys.length;
 
 	var utils = /*#__PURE__*/Object.freeze({
-	  CLASS_NAME_KEY: CLASS_NAME_KEY,
 	  MAX_FUNC_STR_LEN: MAX_FUNC_STR_LEN,
 	  setCustomClassNameTo: setCustomClassNameTo,
 	  getCustomClassNameFrom: getCustomClassNameFrom,
-	  getStringWrap: getStringWrap,
 	  canPassAsIs: canPassAsIs,
 	  keyNeedsConversion: keyNeedsConversion,
 	  isNested: isNested,
+	  setNestedWraps: setNestedWraps,
+	  getNestedWraps: getNestedWraps,
+	  setNestedShortContent: setNestedShortContent,
+	  getNestedShortContent: getNestedShortContent,
 	  isList: isList,
 	  createList: createList,
 	  addToList: addToList,
@@ -265,13 +266,18 @@
 	  } = value;
 
 	  if (!name) {
-	    name = content.substr(content.substr(0, 9) === 'function ' ? 9 : 0, MAX_FUNC_STR_LEN);
+	    name = content.replace(/\s+/g, ' ').substr(content.substr(0, 9) === 'function ' ? 9 : 0, MAX_FUNC_STR_LEN);
+
+	    if (content.length < MAX_FUNC_STR_LEN) {
+	      name = `${name}...`;
+	    }
 	  }
 
 	  const result = createStorage();
-	  addToStorage(result, 'content', content);
-	  setCustomClassNameTo(result, // FIXME almost every function starts with "function ", remove this from short string
-	  `${type}(${name})`);
+	  addToStorage(result, 'code', content);
+	  setNestedWraps(result, '(', ')');
+	  setNestedShortContent(result, name);
+	  setCustomClassNameTo(result, type);
 	  return result;
 	});
 
@@ -500,6 +506,8 @@
 
 	const {
 	  isList,
+	  getListSize,
+	  getNestedWraps,
 	  getCustomClassNameFrom
 	} = logDataRenderer_1;
 	const SPACE_LEVEL = '  ';
@@ -509,23 +517,16 @@
 	const ERROR_TYPE = 'error';
 	const SUCCESS_TYPE = 'success';
 	const getStringWrap = value => {
-	  let pre;
-	  let post;
+	  const wraps = getNestedWraps(value);
 	  const name = getCustomClassNameFrom(value);
 
 	  if (isList(value)) {
-	    pre = '[';
-	    post = ']';
+	    wraps.pre = `${name}(${getListSize(value)})${wraps.pre}`;
 	  } else {
-	    pre = '{';
-	    post = '}';
+	    wraps.pre = `${name}${wraps.pre}`;
 	  }
 
-	  pre = `${name}${pre}`;
-	  return {
-	    pre,
-	    post
-	  };
+	  return wraps;
 	};
 	const removeAllChildren = target => {
 	  while (target.firstChild) {
@@ -538,7 +539,11 @@
 	  iterateStorage,
 	  isNested,
 	  isList: isList$1,
-	  iterateList
+	  iterateList,
+	  getNestedShortContent,
+	  getNestedWraps: getNestedWraps$1,
+	  getListSize: getListSize$1,
+	  getStorageSize
 	} = logDataRenderer_1;
 
 	const setExpandIconSymbol = (icon, expanded) => {
@@ -552,7 +557,15 @@
 	  return icon;
 	};
 
-	const createCollapsedContent = () => [document.createTextNode(' ... ')];
+	const createCollapsedContent = (value, size) => {
+	  let content = getNestedShortContent(value);
+
+	  if (content === undefined) {
+	    content = size ? ' ... ' : '';
+	  }
+
+	  return [document.createTextNode(content)];
+	};
 
 	const createUINestedArrayContent = (list, space) => {
 	  const result = [];
@@ -623,9 +636,10 @@
 	};
 
 	function createUINested(value, space = '', initExpanded = false) {
-	  let expanded = initExpanded;
+	  const size = isList$1(value) ? getListSize$1(value) : getStorageSize(value);
+	  let expanded = initExpanded && !!size;
 	  let contentExpanded;
-	  const contentCollapsed = createCollapsedContent();
+	  const contentCollapsed = createCollapsedContent(value, size);
 	  const {
 	    pre,
 	    post

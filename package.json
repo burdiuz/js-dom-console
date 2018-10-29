@@ -22,7 +22,7 @@
     "url": "https://github.com/burdiuz/js-dom-console.git"
   },
   "dependencies": {
-    "@actualwave/log-data-renderer": "git+https://github.com/burdiuz/js-log-data-renderer.git"
+    "@actualwave/log-data-renderer": "0.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",

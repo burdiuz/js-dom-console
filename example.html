@@ -21,7 +21,7 @@
   Msg.warn(new Date());
   Msg.log(window.location);
   Msg.error(new Error('Something bad happened'));
-  Msg.log([{ name: 'obj-1' }, { name: 'obj-2' }, { name: 'obj-3' }, { name: 'obj-4' }]);
+  Msg.log([{ name: 'obj-1' }, { name: 'obj-2' }, { name: 'obj-3' }, { name: 'obj-4' }], {}, []);
   Msg.log(new Set([{ name: 'obj-1' }, { name: 'obj-2' }, { name: 'obj-3' }, { name: 'obj-4' }]));
   Msg.log(new Map([
     [{ type: 'key' }, { type: 'value' }],
@@ -38,7 +38,7 @@
     third: '3',
   };
 
-  Msg.log(obj);
+  Msg.log('first string', obj, 'second string', 'third string');
 
   obj.fourth = Object.assign({}, obj);
   obj.fifth = obj;
