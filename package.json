@@ -1,7 +1,7 @@
 {
   "name": "@actualwave/dom-console",
   "description": "Small UI helper to display console output on the page.",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "console.js",
   "keywords": [
     "js",
@@ -22,42 +22,43 @@
     "url": "https://github.com/burdiuz/js-dom-console.git"
   },
   "dependencies": {
-    "@actualwave/closure-value": "^0.0.3",
-    "@actualwave/get-class": "^0.0.4"
+    "@actualwave/log-data-renderer": "git+https://github.com/burdiuz/js-log-data-renderer.git"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.6",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-plugin-istanbul": "^4.1.6",
-    "babel-plugin-syntax-trailing-function-commas": "^6.22.0",
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-external-helpers": "^7.0.0",
+    "@babel/plugin-syntax-object-rest-spread": "^7.0.0",
+    "@babel/plugin-transform-flow-strip-types": "^7.0.0",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.4",
+    "babel-plugin-istanbul": "^5.0.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-jest": "^23.2.0",
-    "dotenv": "^6.0.0",
-    "eslint": "^5.4.0",
+    "chokidar": "^2.0.4",
+    "eslint": "^5.6.1",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.1",
-    "flow-bin": "^0.79.1",
-    "husky": "^0.14.3",
-    "jest": "^23.5.0",
-    "lint-staged": "^7.2.2",
-    "prettier": "^1.14.2",
-    "rollup-plugin-babel": "^3.0.7",
-    "rollup-plugin-commonjs": "^9.1.5",
-    "rollup-plugin-json": "^3.0.0",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-serve": "^0.4.2",
-    "rollup-plugin-uglify": "^4.0.0",
-    "uglify-es": "^3.3.9"
+    "flow-bin": "^0.81.0",
+    "husky": "^1.0.1",
+    "jest": "^23.6.0",
+    "lint-staged": "^7.3.0",
+    "prettier": "^1.14.3",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-commonjs": "^9.1.8",
+    "rollup-plugin-json": "^3.1.0",
+    "rollup-plugin-livereload": "^0.6.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup-plugin-serve": "^0.6.0",
+    "rollup-plugin-terser": "^3.0.0"
   },
   "lint-staged": {
     "source/**/*.js": [
+      "prettier --write",
       "eslint --fix",
       "git add"
     ]
@@ -95,17 +96,20 @@
       "!**/vendor/**"
     ],
     "modulePathIgnorePatterns": [
-      "\\/\\."
+      "\\/\\.",
+      "\\.history"
     ]
   },
   "scripts": {
-    "start": "build",
+    "start": "npm run build",
     "build": "rollup --config",
     "build:watch": "rollup --config --watch \"./source\"",
     "lint": "./node_modules/.bin/eslint \"source/**/*.js\"",
+    "flow": "./node_modules/.bin/flow",
+    "server": "rollup --config rollup.serve.js",
     "test": "jest --colors",
     "test:watch": "jest --colors --watch",
     "lint-staged": "lint-staged",
-    "precommit": "npm run lint-staged && npm run build && npm run test"
+    "precommit": "npm run build && npm run test && npm run lint-staged"
   }
 }

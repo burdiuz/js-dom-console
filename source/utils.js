@@ -1,9 +1,8 @@
-// Assigned to an object, when rendering, if exists, will wrap content, like
-// Map{...} or Set[...]
-export const CLASS_NAME_KEY = '@class-name';
+import { utils } from '@actualwave/log-data-renderer';
+
+const { isList, getCustomClassNameFrom } = utils;
 
 export const SPACE_LEVEL = '  ';
-export const MAX_FUNC_STR_LEN = 30;
 
 export const INFO_TYPE = 'info';
 export const LOG_TYPE = 'log';
@@ -11,17 +10,12 @@ export const WARNING_TYPE = 'warning';
 export const ERROR_TYPE = 'error';
 export const SUCCESS_TYPE = 'success';
 
-export const setCustomClassNameTo = (data, className) =>
-  (data[CLASS_NAME_KEY] = className);
-
-export const getCustomClassNameFrom = (data) => data[CLASS_NAME_KEY] || '';
-
 export const getStringWrap = (value) => {
   let pre;
   let post;
   const name = getCustomClassNameFrom(value);
 
-  if (value instanceof Array) {
+  if (isList(value)) {
     pre = '[';
     post = ']';
   } else {
@@ -39,21 +33,3 @@ export const removeAllChildren = (target) => {
     target.removeChild(target.firstChild);
   }
 };
-
-export const canPassAsIs = (value) => typeof value === 'string';
-
-const validKeyRgx = /^[\w_$][\w\d_$]*$/i;
-
-export const keyNeedsConversion = (key) => !(canPassAsIs(key) && validKeyRgx.test(key));
-
-export const isNested = (value) => typeof value === 'object';
-
-export const createComplexDataStorage = () => new Map();
-
-export const isStorage = (storage) => storage instanceof Map;
-
-export const addToStorage = (storage, key, value) => storage.set(key, value);
-
-export const iterateStorage = (storage, handler) => storage.forEach(handler);
-
-export const getStorageSize = (storage) => storage.size;

@@ -1,6 +1,8 @@
-import { convert } from './data';
-import { isNested, canPassAsIs } from './utils';
+
+import convert, { utils } from '@actualwave/log-data-renderer';
 import { createUINested } from './nested';
+
+const { isNested, canPassAsIs } = utils;
 
 const createSimpleValue = (value) => document.createTextNode(`${value} `);
 

@@ -1,11 +1,8 @@
 /* eslint-disable no-use-before-define */
-import {
-  SPACE_LEVEL,
-  getStringWrap,
-  removeAllChildren,
-  iterateStorage,
-  isNested,
-} from './utils';
+import { utils } from '@actualwave/log-data-renderer';
+import { SPACE_LEVEL, getStringWrap, removeAllChildren } from './utils';
+
+const { iterateStorage, isNested, isList, iterateList } = utils;
 
 const setExpandIconSymbol = (icon, expanded) => {
   icon.innerHTML = expanded ? '-' : '+';
@@ -26,7 +23,7 @@ const createUINestedArrayContent = (list, space) => {
   const result = [];
   let text = '\n';
 
-  list.forEach((value) => {
+  iterateList(list, (value) => {
     text += space;
 
     if (isNested(value)) {
@@ -84,7 +81,7 @@ const createUINestedObjectContent = (storage, space) => {
 const createUINestedContent = (value, initSpace) => {
   const space = `${SPACE_LEVEL}${initSpace}`;
 
-  if (value instanceof Array) {
+  if (isList(value)) {
     return createUINestedArrayContent(value, space);
   }
 

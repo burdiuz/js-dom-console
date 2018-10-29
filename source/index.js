@@ -1,18 +1,21 @@
 import {
+  addTypeHandler,
+  getTypeHandler,
+  hasTypeHandler,
+  removeTypeHandler,
+  setTypeHandlerSelector,
+  getMaxNesingDepth,
+  setMaxNesingDepth,
+} from '@actualwave/log-data-renderer';
+
+import {
   INFO_TYPE,
   LOG_TYPE,
   WARNING_TYPE,
   ERROR_TYPE,
   SUCCESS_TYPE,
 } from './utils';
-import {
-  addTypeHandler,
-  getTypeHandler,
-  hasTypeHandler,
-  removeTypeHandler,
-  setTypeHandlerSelector,
-} from './types';
-import { getMaxNesingDepth, setMaxNesingDepth } from './max-depth';
+
 import { buildContent } from './dom';
 
 export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
