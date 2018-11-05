@@ -25,7 +25,7 @@ maximum level, use functions `getMaxNesingDepth()` and `setMaxNesingDepth()` res
 
 ### CDN
 
-To use on platform like [jsfiddle.net](https://jsfiddle.net/), add these files:
+To use on platform like [jsfiddle.net](https://jsfiddle.net/), add these files:  
 Using UNPKG:
 * [https://unpkg.com/@actualwave/dom-console@latest/console.css](https://unpkg.com/@actualwave/dom-console@latest/console.css)
 * [https://unpkg.com/@actualwave/dom-console@latest/console.js](https://unpkg.com/@actualwave/dom-console@latest/console.js)
