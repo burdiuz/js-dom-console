@@ -1,5 +1,5 @@
 
-# DOMConsole
+# @actualwave/dom-console
 
 Small UI helper to display console output on the page.
 I've made it just to [make nice demos](https://jsfiddle.net/actualwave/wa45vyz8/).
@@ -33,6 +33,16 @@ Using UNPKG:
 Using GitHub as CDN:
 * [https://rawgit.com/burdiuz/js-dom-console/master/console.css](https://rawgit.com/burdiuz/js-dom-console/master/console.css)
 * [https://rawgit.com/burdiuz/js-dom-console/master/console.js](https://rawgit.com/burdiuz/js-dom-console/master/console.js)
+
+### Install
+It can be installed from NPM
+```
+npm install @actualwave/dom-console
+```
+using yarn
+```
+yarn add @actualwave/dom-console
+```
 
 ### TODOs
 1. Add display for HTML nodes/elements(via outerHTML).
