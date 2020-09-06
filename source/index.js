@@ -30,11 +30,11 @@ export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
     }
   };
 
-  const pushItem = (content, type = LOG_TYPE) => {
+  const pushItem = (content, type = LOG_TYPE, converted = false) => {
     const item = document.createElement('div');
     item.className = `ui-console-item ui-console-item-${type}`;
 
-    buildContent(content, item);
+    buildContent(content, item, converted);
 
     container.appendChild(item);
     shiftOverMax();
@@ -46,6 +46,8 @@ export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
     warn: (...content) => pushItem(content, WARNING_TYPE),
     error: (...content) => pushItem(content, ERROR_TYPE),
     success: (...content) => pushItem(content, SUCCESS_TYPE),
+    push: (type, ...content) => pushItem(content, type),
+    pushRendered: (type, ...content) => pushItem(content, type, true),
   };
 };
 

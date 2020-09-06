@@ -6,15 +6,15 @@ const { isNested, canPassAsIs } = utils;
 
 const createSimpleValue = (value) => document.createTextNode(`${value} `);
 
-export const buildContent = (content, item) => {
+export const buildContent = (content, item, converted = false) => {
   content.forEach((value) => {
-    if (canPassAsIs(value)) {
+    if (!converted && canPassAsIs(value)) {
       // shortcut for log strings to not wrap them with quotes
       item.appendChild(createSimpleValue(value));
       return;
     }
 
-    const result = convert(value);
+    const result = converted ? value : convert(value);
 
     if (isNested(result)) {
       item.appendChild(createUINested(result, '', true));

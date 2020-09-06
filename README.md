@@ -17,6 +17,11 @@ Msg.error(new Error('Something bad happened'));
 All the styles in `console.css` file.
 > It does not dig into prototype chain and displays only own properties of the object.
 
+DOM Console is based on [Log Data Renderer](https://www.npmjs.com/package/@actualwave/log-data-renderer)
+and it uses renderer under the hood to extract from passed values a set of valuable information(JSON-friendly) and then display it.
+I needed to display raw data coming from Log Data Renderer as is and added a new method `pushRendered(type, ...content)`
+which can be used to display such data. Using it you can render data somewhere else and send to the console in JSON-friendly format.
+
 ### Nesting
 
 By default DOMConsole parses objects 2 levels deep, then it will just get their
@@ -25,7 +30,7 @@ maximum level, use functions `getMaxNesingDepth()` and `setMaxNesingDepth()` res
 
 ### CDN
 
-To use on platform like [jsfiddle.net](https://jsfiddle.net/), add these files:  
+To use on platform like [jsfiddle.net](https://jsfiddle.net/), add these files:
 Using UNPKG:
 * [https://unpkg.com/@actualwave/dom-console@latest/console.css](https://unpkg.com/@actualwave/dom-console@latest/console.css)
 * [https://unpkg.com/@actualwave/dom-console@latest/console.js](https://unpkg.com/@actualwave/dom-console@latest/console.js)

@@ -1,15 +1,25 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.DOMConsole = {})));
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.DOMConsole = {}));
 }(this, (function (exports) { 'use strict';
 
-	function unwrapExports (x) {
-		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
+	function getDefaultExportFromCjs (x) {
+		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 	}
 
-	function createCommonjsModule(fn, module) {
-		return module = { exports: {} }, fn(module, module.exports), module.exports;
+	function createCommonjsModule(fn, basedir, module) {
+		return module = {
+		  path: basedir,
+		  exports: {},
+		  require: function (path, base) {
+	      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
+	    }
+		}, fn(module, module.exports), module.exports;
+	}
+
+	function commonjsRequire () {
+		throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
 	}
 
 	var getClass_1 = createCommonjsModule(function (module, exports) {
@@ -58,11 +68,6 @@
 	exports.getClass = getClass;
 	exports.default = getClass;
 	});
-
-	unwrapExports(getClass_1);
-	var getClass_2 = getClass_1.getClassName;
-	var getClass_3 = getClass_1.getParentClass;
-	var getClass_4 = getClass_1.getClass;
 
 	var closureValue = createCommonjsModule(function (module, exports) {
 
@@ -117,11 +122,6 @@
 	exports.valuesMapFactory = valuesMapFactory;
 	exports.valuesSetFactory = valuesSetFactory;
 	});
-
-	unwrapExports(closureValue);
-	var closureValue_1 = closureValue.singleValueFactory;
-	var closureValue_2 = closureValue.valuesMapFactory;
-	var closureValue_3 = closureValue.valuesSetFactory;
 
 	var logDataRenderer = createCommonjsModule(function (module, exports) {
 
@@ -419,26 +419,26 @@
 	  }
 
 	  if (value instanceof Function) {
-	    return convertFunction(value, convertValue, refs);
+	    return convertFunction(value);
 	  }
 
 	  if (value instanceof Error) {
-	    return convertError(value, convertValue, refs);
+	    return convertError(value, convertValue);
 	  }
 
 	  if (value instanceof Map) {
-	    return convertMap(value, convertValue, refs);
+	    return convertMap(value, convertValue);
 	  }
 
 	  if (value instanceof Set) {
-	    return convertSet(value, convertValue, refs);
+	    return convertSet(value, convertValue);
 	  }
 
 	  if (value instanceof Array) {
-	    return convertArray(value, convertValue, refs);
+	    return convertArray(value, convertValue);
 	  }
 
-	  return convertObject(value, convertValue, refs);
+	  return convertObject(value, convertValue);
 	};
 
 	const convert = (value, level = 1, refs = new Map()) => {
@@ -468,7 +468,7 @@
 	    result = handler(value, nextConvert, refs);
 	  }
 
-	  result = fallbackConversion(value, nextConvert, refs);
+	  result = fallbackConversion(value, nextConvert);
 
 	  if (complex) {
 	    refs.set(value, result);
@@ -492,24 +492,14 @@
 
 	});
 
-	var convert = unwrapExports(logDataRenderer);
-	var logDataRenderer_1 = logDataRenderer.utils;
-	var logDataRenderer_2 = logDataRenderer.addTypeHandler;
-	var logDataRenderer_3 = logDataRenderer.getTypeHandler;
-	var logDataRenderer_4 = logDataRenderer.hasTypeHandler;
-	var logDataRenderer_5 = logDataRenderer.removeTypeHandler;
-	var logDataRenderer_6 = logDataRenderer.setTypeHandlerSelector;
-	var logDataRenderer_7 = logDataRenderer.isString;
-	var logDataRenderer_8 = logDataRenderer.convert;
-	var logDataRenderer_9 = logDataRenderer.getMaxNesingDepth;
-	var logDataRenderer_10 = logDataRenderer.setMaxNesingDepth;
+	var convert = /*@__PURE__*/getDefaultExportFromCjs(logDataRenderer);
 
 	const {
 	  isList,
 	  getListSize,
 	  getNestedWraps,
 	  getCustomClassNameFrom
-	} = logDataRenderer_1;
+	} = logDataRenderer.utils;
 	const SPACE_LEVEL = '  ';
 	const INFO_TYPE = 'info';
 	const LOG_TYPE = 'log';
@@ -544,7 +534,7 @@
 	  getNestedWraps: getNestedWraps$1,
 	  getListSize: getListSize$1,
 	  getStorageSize
-	} = logDataRenderer_1;
+	} = logDataRenderer.utils;
 
 	const setExpandIconSymbol = (icon, expanded) => {
 	  icon.innerHTML = expanded ? '-' : '+';
@@ -685,19 +675,19 @@
 	const {
 	  isNested: isNested$1,
 	  canPassAsIs
-	} = logDataRenderer_1;
+	} = logDataRenderer.utils;
 
 	const createSimpleValue = value => document.createTextNode(`${value} `);
 
-	const buildContent = (content, item) => {
+	const buildContent = (content, item, converted = false) => {
 	  content.forEach(value => {
-	    if (canPassAsIs(value)) {
+	    if (!converted && canPassAsIs(value)) {
 	      // shortcut for log strings to not wrap them with quotes
 	      item.appendChild(createSimpleValue(value));
 	      return;
 	    }
 
-	    const result = convert(value);
+	    const result = converted ? value : convert(value);
 
 	    if (isNested$1(result)) {
 	      item.appendChild(createUINested(result, '', true));
@@ -721,10 +711,10 @@
 	    }
 	  };
 
-	  const pushItem = (content, type = LOG_TYPE) => {
+	  const pushItem = (content, type = LOG_TYPE, converted = false) => {
 	    const item = document.createElement('div');
 	    item.className = `ui-console-item ui-console-item-${type}`;
-	    buildContent(content, item);
+	    buildContent(content, item, converted);
 	    container.appendChild(item);
 	    shiftOverMax();
 	  };
@@ -734,7 +724,9 @@
 	    log: (...content) => pushItem(content, LOG_TYPE),
 	    warn: (...content) => pushItem(content, WARNING_TYPE),
 	    error: (...content) => pushItem(content, ERROR_TYPE),
-	    success: (...content) => pushItem(content, SUCCESS_TYPE)
+	    success: (...content) => pushItem(content, SUCCESS_TYPE),
+	    push: (type, ...content) => pushItem(content, type),
+	    pushRendered: (type, ...content) => pushItem(content, type, true)
 	  };
 	};
 	const create = (wrapper, maxItems = Number.MAX_SAFE_INTEGER) => {
@@ -744,15 +736,15 @@
 	  return init(container, maxItems);
 	};
 
-	exports.init = init;
+	exports.addTypeHandler = logDataRenderer.addTypeHandler;
 	exports.create = create;
-	exports.addTypeHandler = logDataRenderer_2;
-	exports.getTypeHandler = logDataRenderer_3;
-	exports.hasTypeHandler = logDataRenderer_4;
-	exports.removeTypeHandler = logDataRenderer_5;
-	exports.setTypeHandlerSelector = logDataRenderer_6;
-	exports.getMaxNesingDepth = logDataRenderer_9;
-	exports.setMaxNesingDepth = logDataRenderer_10;
+	exports.getMaxNesingDepth = logDataRenderer.getMaxNesingDepth;
+	exports.getTypeHandler = logDataRenderer.getTypeHandler;
+	exports.hasTypeHandler = logDataRenderer.hasTypeHandler;
+	exports.init = init;
+	exports.removeTypeHandler = logDataRenderer.removeTypeHandler;
+	exports.setMaxNesingDepth = logDataRenderer.setMaxNesingDepth;
+	exports.setTypeHandlerSelector = logDataRenderer.setTypeHandlerSelector;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
