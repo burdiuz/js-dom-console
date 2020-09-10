@@ -127,11 +127,12 @@
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
-	function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 
-	var getClass__default = _interopDefault(getClass_1);
 
+	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+	var getClass__default = /*#__PURE__*/_interopDefaultLegacy(getClass_1);
 
 	// Assigned to an object, when rendering, if exists, will wrap content, like
 	// Map{...} or Set[...]
@@ -200,6 +201,7 @@
 	}) => keys.length;
 
 	var utils = /*#__PURE__*/Object.freeze({
+	  __proto__: null,
 	  MAX_FUNC_STR_LEN: MAX_FUNC_STR_LEN,
 	  setCustomClassNameTo: setCustomClassNameTo,
 	  getCustomClassNameFrom: getCustomClassNameFrom,
@@ -341,7 +343,7 @@
 	const getTypeHandler = constructor => types.get(constructor);
 	const removeTypeHandler = constructor => types.delete(constructor);
 	const defaultTypeHandlerSelector = value => {
-	  const type = getClass__default(value);
+	  const type = getClass__default['default'](value);
 	  return type && getTypeHandler(type);
 	};
 	let typeHandlerSelector = defaultTypeHandlerSelector;
@@ -409,7 +411,12 @@
 	        return convertDate(value);
 	      }
 
-	      return `${value}`;
+	      try {
+	        return `${value}`;
+	      } catch (error) {
+	        return '[object Non-Serializable]';
+	      }
+
 	  }
 	};
 
@@ -477,18 +484,18 @@
 	  return result;
 	};
 
-	exports.default = convert;
-	exports.utils = utils;
 	exports.addTypeHandler = addTypeHandler;
+	exports.convert = convert;
+	exports.default = convert;
+	exports.getMaxNesingDepth = getMaxNesingDepth;
 	exports.getTypeHandler = getTypeHandler;
 	exports.hasTypeHandler = hasTypeHandler;
-	exports.removeTypeHandler = removeTypeHandler;
-	exports.setTypeHandlerSelector = setTypeHandlerSelector;
 	exports.isString = isString;
-	exports.toString = toString;
-	exports.convert = convert;
-	exports.getMaxNesingDepth = getMaxNesingDepth;
+	exports.removeTypeHandler = removeTypeHandler;
 	exports.setMaxNesingDepth = setMaxNesingDepth;
+	exports.setTypeHandlerSelector = setTypeHandlerSelector;
+	exports.toString = toString;
+	exports.utils = utils;
 
 	});
 
@@ -726,7 +733,10 @@
 	    error: (...content) => pushItem(content, ERROR_TYPE),
 	    success: (...content) => pushItem(content, SUCCESS_TYPE),
 	    push: (type, ...content) => pushItem(content, type),
-	    pushRendered: (type, ...content) => pushItem(content, type, true)
+	    pushRendered: (type, ...content) => pushItem(content, type, true),
+	    clear: () => {
+	      container.innerHTML = '';
+	    }
 	  };
 	};
 	const create = (wrapper, maxItems = Number.MAX_SAFE_INTEGER) => {

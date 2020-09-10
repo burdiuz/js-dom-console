@@ -22,6 +22,7 @@ export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
   const shiftOverMax = () => {
     while (maxItems > 0 && maxItems < container.childElementCount) {
       const child = container.firstElementChild;
+
       if (!child) {
         return;
       }
@@ -48,6 +49,9 @@ export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
     success: (...content) => pushItem(content, SUCCESS_TYPE),
     push: (type, ...content) => pushItem(content, type),
     pushRendered: (type, ...content) => pushItem(content, type, true),
+    clear: () => {
+      container.innerHTML = '';
+    },
   };
 };
 
