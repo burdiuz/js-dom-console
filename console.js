@@ -343,7 +343,7 @@
 	const getTypeHandler = constructor => types.get(constructor);
 	const removeTypeHandler = constructor => types.delete(constructor);
 	const defaultTypeHandlerSelector = value => {
-	  const type = getClass_1(value);
+	  const type = getClass_1.getClass(value);
 	  return type && getTypeHandler(type);
 	};
 	let typeHandlerSelector = defaultTypeHandlerSelector;
