@@ -3,6 +3,7 @@
   "description": "Small UI helper to display console output on the page.",
   "version": "0.0.10",
   "main": "console.js",
+  "type": "module",
   "keywords": [
     "js",
     "javascript",
@@ -22,13 +23,13 @@
     "url": "https://github.com/burdiuz/js-dom-console.git"
   },
   "dependencies": {
-    "@actualwave/log-data-renderer": "0.0.11"
+    "@actualwave/log-data-renderer": "0.0.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.1.2",
-    "@babel/plugin-external-helpers": "^7.0.0",
-    "@babel/plugin-syntax-object-rest-spread": "^7.0.0",
-    "@babel/plugin-transform-flow-strip-types": "^7.0.0",
+    "@babel/core": "^7.22.9",
+    "@babel/plugin-external-helpers": "^7.22.5",
+    "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
+    "@babel/plugin-transform-flow-strip-types": "^7.22.5",
     "@rollup/plugin-babel": "^5.2.0",
     "@rollup/plugin-commonjs": "^15.0.0",
     "@rollup/plugin-json": "^4.1.0",

@@ -1,4 +1,4 @@
-import { umdConfig, umdMinConfig } from './rollup.helpers';
+import { umdConfig, umdMinConfig } from './rollup.helpers.js';
 
 export default [
   umdConfig,

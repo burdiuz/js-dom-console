@@ -2,7 +2,7 @@
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
 	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.DOMConsole = {}));
-}(this, (function (exports) { 'use strict';
+})(this, (function (exports) { 'use strict';
 
 	function getDefaultExportFromCjs (x) {
 		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -130,10 +130,6 @@
 
 
 
-	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-	var getClass__default = /*#__PURE__*/_interopDefaultLegacy(getClass_1);
-
 	// Assigned to an object, when rendering, if exists, will wrap content, like
 	// Map{...} or Set[...]
 	const MAX_FUNC_STR_LEN = 30;
@@ -203,25 +199,25 @@
 	var utils = /*#__PURE__*/Object.freeze({
 	  __proto__: null,
 	  MAX_FUNC_STR_LEN: MAX_FUNC_STR_LEN,
-	  setCustomClassNameTo: setCustomClassNameTo,
-	  getCustomClassNameFrom: getCustomClassNameFrom,
-	  canPassAsIs: canPassAsIs,
-	  keyNeedsConversion: keyNeedsConversion,
-	  isNested: isNested,
-	  setNestedWraps: setNestedWraps,
-	  getNestedWraps: getNestedWraps,
-	  setNestedShortContent: setNestedShortContent,
-	  getNestedShortContent: getNestedShortContent,
-	  isList: isList,
-	  createList: createList,
 	  addToList: addToList,
-	  iterateList: iterateList,
-	  getListSize: getListSize,
-	  isStorage: isStorage,
-	  createStorage: createStorage,
 	  addToStorage: addToStorage,
+	  canPassAsIs: canPassAsIs,
+	  createList: createList,
+	  createStorage: createStorage,
+	  getCustomClassNameFrom: getCustomClassNameFrom,
+	  getListSize: getListSize,
+	  getNestedShortContent: getNestedShortContent,
+	  getNestedWraps: getNestedWraps,
+	  getStorageSize: getStorageSize,
+	  isList: isList,
+	  isNested: isNested,
+	  isStorage: isStorage,
+	  iterateList: iterateList,
 	  iterateStorage: iterateStorage,
-	  getStorageSize: getStorageSize
+	  keyNeedsConversion: keyNeedsConversion,
+	  setCustomClassNameTo: setCustomClassNameTo,
+	  setNestedShortContent: setNestedShortContent,
+	  setNestedWraps: setNestedWraps
 	});
 
 	var convertArray = ((value, convertValue) => {
@@ -302,7 +298,11 @@
 	var convertObject = ((value, convertValue) => {
 	  const result = createStorage();
 	  Object.keys(value).forEach(key => {
-	    addToStorage(result, keyNeedsConversion(key) ? convertValue(key) : key, convertValue(value[key]));
+	    try {
+	      addToStorage(result, keyNeedsConversion(key) ? convertValue(key) : key, convertValue(value[key]));
+	    } catch (error) {
+	      /* Possible SecurityError when accessing properties from restricted origin */
+	    }
 	  });
 	  setCustomClassNameTo(result, getClass_1.getClassName(value));
 	  return result;
@@ -343,7 +343,7 @@
 	const getTypeHandler = constructor => types.get(constructor);
 	const removeTypeHandler = constructor => types.delete(constructor);
 	const defaultTypeHandlerSelector = value => {
-	  const type = getClass__default['default'](value);
+	  const type = getClass_1(value);
 	  return type && getTypeHandler(type);
 	};
 	let typeHandlerSelector = defaultTypeHandlerSelector;
@@ -469,13 +469,7 @@
 
 	  const nextConvert = propValue => convert(propValue, level + 1, refs);
 
-	  let result;
-
-	  if (handler) {
-	    result = handler(value, nextConvert, refs);
-	  }
-
-	  result = fallbackConversion(value, nextConvert);
+	  const result = handler ? handler(value, nextConvert, refs) : fallbackConversion(value, nextConvert);
 
 	  if (complex) {
 	    refs.set(value, result);
@@ -502,9 +496,9 @@
 	var convert = /*@__PURE__*/getDefaultExportFromCjs(logDataRenderer);
 
 	const {
-	  isList,
-	  getListSize,
-	  getNestedWraps,
+	  isList: isList$1,
+	  getListSize: getListSize$1,
+	  getNestedWraps: getNestedWraps$1,
 	  getCustomClassNameFrom
 	} = logDataRenderer.utils;
 	const SPACE_LEVEL = '  ';
@@ -514,15 +508,13 @@
 	const ERROR_TYPE = 'error';
 	const SUCCESS_TYPE = 'success';
 	const getStringWrap = value => {
-	  const wraps = getNestedWraps(value);
+	  const wraps = getNestedWraps$1(value);
 	  const name = getCustomClassNameFrom(value);
-
-	  if (isList(value)) {
-	    wraps.pre = `${name}(${getListSize(value)})${wraps.pre}`;
+	  if (isList$1(value)) {
+	    wraps.pre = `${name}(${getListSize$1(value)})${wraps.pre}`;
 	  } else {
 	    wraps.pre = `${name}${wraps.pre}`;
 	  }
-
 	  return wraps;
 	};
 	const removeAllChildren = target => {
@@ -534,106 +526,85 @@
 	/* eslint-disable no-use-before-define */
 	const {
 	  iterateStorage,
-	  isNested,
-	  isList: isList$1,
+	  isNested: isNested$1,
+	  isList,
 	  iterateList,
 	  getNestedShortContent,
-	  getNestedWraps: getNestedWraps$1,
-	  getListSize: getListSize$1,
+	  getNestedWraps,
+	  getListSize,
 	  getStorageSize
 	} = logDataRenderer.utils;
-
 	const setExpandIconSymbol = (icon, expanded) => {
 	  icon.innerHTML = expanded ? '-' : '+';
 	};
-
 	const createExpandIcon = expanded => {
 	  const icon = document.createElement('span');
 	  icon.className = 'ui-console-button-expand';
 	  setExpandIconSymbol(icon, expanded);
 	  return icon;
 	};
-
 	const createCollapsedContent = (value, size) => {
 	  let content = getNestedShortContent(value);
-
 	  if (content === undefined) {
 	    content = size ? ' ... ' : '';
 	  }
-
 	  return [document.createTextNode(content)];
 	};
-
 	const createUINestedArrayContent = (list, space) => {
 	  const result = [];
 	  let text = '\n';
 	  iterateList(list, value => {
 	    text += space;
-
-	    if (isNested(value)) {
+	    if (isNested$1(value)) {
 	      result.push(document.createTextNode(text));
 	      text = '';
 	      result.push(createUINested(value, space));
 	    } else {
 	      text += value;
 	    }
-
 	    text += ', \n';
 	  });
-
 	  if (text) {
 	    result.push(document.createTextNode(text));
 	  }
-
 	  return result;
 	};
-
 	const createUINestedObjectContent = (storage, space) => {
 	  const result = [];
 	  let text = '\n';
 	  iterateStorage(storage, (value, key) => {
 	    text += `${space}`;
-
-	    if (isNested(key)) {
+	    if (isNested$1(key)) {
 	      result.push(document.createTextNode(`${text}[`));
 	      result.push(createUINested(key, space));
 	      text = ']';
 	    } else {
 	      text += key;
 	    }
-
 	    text += ': ';
-
-	    if (isNested(value)) {
+	    if (isNested$1(value)) {
 	      result.push(document.createTextNode(text));
 	      result.push(createUINested(value, space));
 	      text = '';
 	    } else {
 	      text += value;
 	    }
-
 	    text += ', \n';
 	  });
-
 	  if (text) {
 	    result.push(document.createTextNode(text));
 	  }
-
 	  return result;
 	};
-
 	const createUINestedContent = (value, initSpace) => {
 	  const space = `${SPACE_LEVEL}${initSpace}`;
-
-	  if (isList$1(value)) {
+	  if (isList(value)) {
 	    return createUINestedArrayContent(value, space);
 	  }
-
 	  return createUINestedObjectContent(value, space);
 	};
-
 	function createUINested(value, space = '', initExpanded = false) {
-	  const size = isList$1(value) ? getListSize$1(value) : getStorageSize(value);
+	  const size = isList(value) ? getListSize(value) : getStorageSize(value);
 	  let expanded = initExpanded && !!size;
 	  let contentExpanded;
 	  const contentCollapsed = createCollapsedContent(value, size);
@@ -648,26 +619,21 @@
 	  link.className = 'ui-console-clickable';
 	  link.appendChild(icon);
 	  link.appendChild(document.createTextNode(pre));
-
 	  const drawContents = () => {
 	    let content;
 	    removeAllChildren(wrapper);
 	    wrapper.appendChild(link);
-
 	    if (expanded) {
 	      if (!contentExpanded) {
 	        contentExpanded = createUINestedContent(value, space);
 	      }
-
 	      content = contentExpanded;
 	    } else {
 	      content = contentCollapsed;
 	    }
-
 	    content.forEach(node => wrapper.appendChild(node));
 	    wrapper.appendChild(document.createTextNode(expanded ? `${space}${post}` : post));
 	  };
-
 	  link.addEventListener('click', event => {
 	    event.preventDefault();
 	    event.stopPropagation();
@@ -680,12 +646,10 @@
 	}
 
 	const {
-	  isNested: isNested$1,
+	  isNested,
 	  canPassAsIs
 	} = logDataRenderer.utils;
-
 	const createSimpleValue = value => document.createTextNode(`${value} `);
-
 	const buildContent = (content, item, converted = false) => {
 	  content.forEach(value => {
 	    if (!converted && canPassAsIs(value)) {
@@ -693,10 +657,8 @@
 	      item.appendChild(createSimpleValue(value));
 	      return;
 	    }
-
 	    const result = converted ? value : convert(value);
-
-	    if (isNested$1(result)) {
+	    if (isNested(result)) {
 	      item.appendChild(createUINested(result, '', true));
 	    } else {
 	      item.appendChild(createSimpleValue(result));
@@ -709,15 +671,12 @@
 	  const shiftOverMax = () => {
 	    while (maxItems > 0 && maxItems < container.childElementCount) {
 	      const child = container.firstElementChild;
-
 	      if (!child) {
 	        return;
 	      }
-
 	      child.remove();
 	    }
 	  };
-
 	  const pushItem = (content, type = LOG_TYPE, converted = false) => {
 	    const item = document.createElement('div');
 	    item.className = `ui-console-item ui-console-item-${type}`;
@@ -725,7 +684,6 @@
 	    container.appendChild(item);
 	    shiftOverMax();
 	  };
-
 	  return {
 	    info: (...content) => pushItem(content, INFO_TYPE),
 	    log: (...content) => pushItem(content, LOG_TYPE),
@@ -758,5 +716,5 @@
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=console.js.map
