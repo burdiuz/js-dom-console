@@ -75,3 +75,15 @@ export {
   getMaxNesingDepth,
   setMaxNesingDepth,
 };
+
+export default {
+  create,
+  init,
+  addTypeHandler,
+  getTypeHandler,
+  hasTypeHandler,
+  removeTypeHandler,
+  setTypeHandlerSelector,
+  getMaxNesingDepth,
+  setMaxNesingDepth,
+};

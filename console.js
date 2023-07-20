@@ -699,9 +699,21 @@
     wrapper.appendChild(container);
     return init(container, maxItems);
   };
+  var index = {
+    create,
+    init,
+    addTypeHandler,
+    getTypeHandler,
+    hasTypeHandler,
+    removeTypeHandler,
+    setTypeHandlerSelector,
+    getMaxNesingDepth,
+    setMaxNesingDepth
+  };
 
   exports.addTypeHandler = addTypeHandler;
   exports.create = create;
+  exports["default"] = index;
   exports.getMaxNesingDepth = getMaxNesingDepth;
   exports.getTypeHandler = getTypeHandler;
   exports.hasTypeHandler = hasTypeHandler;
