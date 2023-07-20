@@ -1,7 +1,7 @@
 {
   "name": "@actualwave/dom-console",
   "description": "Small UI helper to display console output on the page.",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "console.js",
   "module": "source/index.js",
   "exports": [
@@ -29,7 +29,7 @@
     "url": "https://github.com/burdiuz/js-dom-console.git"
   },
   "dependencies": {
-    "@actualwave/log-data-renderer": "0.0.16"
+    "@actualwave/log-data-renderer": "0.0.17"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",

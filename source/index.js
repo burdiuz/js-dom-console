@@ -14,9 +14,9 @@ import {
   WARNING_TYPE,
   ERROR_TYPE,
   SUCCESS_TYPE,
-} from './utils';
+} from './utils.js';
 
-import { buildContent } from './dom';
+import { buildContent } from './dom.js';
 
 export const init = (container, maxItems = Number.MAX_SAFE_INTEGER) => {
   const shiftOverMax = () => {

@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { utils } from '@actualwave/log-data-renderer';
-import { SPACE_LEVEL, getStringWrap, removeAllChildren } from './utils';
+import { SPACE_LEVEL, getStringWrap, removeAllChildren } from './utils.js';
 
 const {
   iterateStorage,

@@ -1,6 +1,6 @@
 
 import convert, { utils } from '@actualwave/log-data-renderer';
-import { createUINested } from './nested';
+import { createUINested } from './nested.js';
 
 const { isNested, canPassAsIs } = utils;
 
